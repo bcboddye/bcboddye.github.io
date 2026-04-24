@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Maker's Mark | Q4 2025 Campaign Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap');
+
+:root {
+  --mm-red:    #8B1A1A;
+  --mm-gold:   #C9953A;
+  --mm-cream:  #F5EFE0;
+  --wmt-blue:  #0053e2;
+  --wmt-spark: #ffc220;
+  --dark-bg:   #0E0A06;
+  --card-bg:   #1A1208;
+  --card-br:   #2E2010;
+  --text-main: #F5EFE0;
+  --text-muted:#A8936E;
+  --green:     #2a8703;
+  --radius:    14px;
+}
+
+* { box-sizing: border-box; }
+body { font-family:'Inter',sans-serif; background:var(--dark-bg); color:var(--text-main); margin:0; }
+h1,h2,.serif { font-family:'Playfair Display',serif; }
+
+/* ── Hero ── */
+.hero {
+  background: radial-gradient(ellipse at 70% 50%, rgba(139,26,26,.55) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(201,149,58,.25) 0%, transparent 50%),
+              linear-gradient(135deg, #0E0A06 0%, #2A1205 45%, #1A0A0A 100%);
+  border-bottom: 3px solid var(--mm-gold);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0; opacity:.07;
+  background: repeating-linear-gradient(45deg,#C9953A 0,#C9953A 1px,transparent 0,transparent 50%);
+  background-size:20px 20px;
+}
+@keyframes sealPulse {
+  0%, 100% { box-shadow:0 4px 24px rgba(139,26,26,.6), 0 0 0 6px rgba(201,149,58,.3); }
+  50%       { box-shadow:0 4px 32px rgba(139,26,26,.9), 0 0 0 10px rgba(201,149,58,.15); }
+}
+.wax-seal {
+  width:90px; height:90px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #C0392B, #7B0000);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 24px rgba(139,26,26,.6), 0 0 0 6px rgba(201,149,58,.3);
+  font-size:2rem; flex-shrink:0;
+  animation: sealPulse 3s ease-in-out infinite;
+}
+
+/* ── KPI Cards ── */
+.kpi-card {
+  background:var(--card-bg); border:1px solid var(--card-br);
+  border-radius:var(--radius); padding:24px;
+  transition:transform .2s, box-shadow .2s;
+}
+.kpi-card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(201,149,58,.15); }
+.kpi-card .metric { font-size:2rem; font-weight:900; color:var(--mm-gold); }
+.kpi-card .label  { font-size:.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+.kpi-card .sub    { font-size:.8rem; color:var(--text-muted); margin-top:6px; }
+
+/* Highlight card (2025 spotlight) */
+.kpi-card.spotlight {
+  border-color:var(--mm-gold);
+  box-shadow: 0 0 0 1px rgba(201,149,58,.3), 0 8px 32px rgba(201,149,58,.12);
+}
+.kpi-card.spotlight .metric { color:#FFD580; }
+
+/* ── Section Headers ── */
+.section-head {
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(180deg, #FFD580, #8B1A1A) 1;
+  padding-left: 14px;
+  font-size: 1.25rem; font-weight: 800; color: var(--mm-cream);
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px rgba(201,149,58,.2);
+}
+.section-sub { color:var(--text-muted); font-size:.85rem; margin-bottom:24px; padding-left:18px; }
+
+/* ── Comparison Table ── */
+.comp-table { width:100%; border-collapse:collapse; }
+.comp-table th, .comp-table td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--card-br); }
+.comp-table th { color:var(--text-muted); font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; }
+.comp-table td { font-size:.9rem; }
+.comp-table tr:last-child td { border-bottom:none; }
+.comp-table .year-25 { color:#FFD580; font-weight:700; }
+.comp-table .year-24 { color:var(--text-muted); }
+.comp-table .delta.up   { color:#4ade80; }
+.comp-table .delta.down { color:#f87171; }
+.comp-table .delta.neutral { color:var(--text-muted); }
+
+/* ── Chart containers ── */
+.chart-wrap { position:relative; height:220px; }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; gap:6px; border-radius:9999px; font-size:.75rem; font-weight:700; padding:4px 12px; }
+.badge-gold  { background:rgba(201,149,58,.2); color:#FFD580; border:1px solid rgba(201,149,58,.4); }
+.badge-blue  { background:rgba(0,83,226,.2); color:#93bbff; border:1px solid rgba(0,83,226,.4); }
+.badge-green { background:rgba(42,135,3,.2); color:#86efac; border:1px solid rgba(42,135,3,.4); }
+.badge-red   { background:rgba(139,26,26,.4); color:#fca5a5; border:1px solid rgba(139,26,26,.6); }
+
+/* ── YoY pill ── */
+.yoy-pill { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:9999px; margin-left:8px; }
+.yoy-up   { background:#166534; color:#bbf7d0; }
+.yoy-down { background:#7f1d1d; color:#fecaca; }
+
+/* ── Investment Calculator ── */
+.calc-wrap {
+  background: linear-gradient(135deg, #1A0E05 0%, #2A1408 50%, #1A0A1A 100%);
+  border:1px solid rgba(201,149,58,.3);
+  border-radius:20px; padding:32px;
+}
+.calc-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; color:var(--mm-gold); margin-bottom:4px; }
+.calc-sub   { color:var(--text-muted); font-size:.85rem; margin-bottom:24px; }
+
+.slider-wrap { margin-bottom:28px; }
+.slider-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+.slider-lbl { font-size:.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; }
+.invest-display { font-size:2.8rem; font-weight:900; color:#FFD580; line-height:1; }
+
+input[type=range] {
+  width:100%; height:6px; border-radius:3px; outline:none; cursor:pointer;
+  background: linear-gradient(to right, var(--mm-gold) var(--pct,30%), rgba(255,255,255,.15) var(--pct,30%));
+  -webkit-appearance:none; appearance:none; --pct:30%;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none;
+  width:24px; height:24px; border-radius:50%;
+  background:#fff; border:4px solid var(--mm-gold);
+  box-shadow:0 2px 10px rgba(201,149,58,.5); cursor:pointer;
+}
+
+.channel-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:640px){ .channel-grid{ grid-template-columns:1fr; } }
+
+.channel-card {
+  background:rgba(255,255,255,.04); border-radius:12px; padding:20px;
+  border:1px solid rgba(255,255,255,.08); transition:border-color .2s;
+}
+.channel-card.wmc { border-color:rgba(0,83,226,.4); }
+.channel-card.rom { border-color:rgba(201,149,58,.4); }
+
+.ch-icon  { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:12px; }
+.ch-icon.wmc { background:rgba(0,83,226,.2); }
+.ch-icon.rom { background:rgba(201,149,58,.15); }
+.ch-name  { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:4px; }
+.ch-iroas { font-size:1rem; font-weight:700; margin-bottom:12px; }
+.ch-return-lbl { font-size:.7rem; color:var(--text-muted); }
+.ch-return { font-size:1.8rem; font-weight:900; line-height:1.1; }
+.wmc .ch-return { color:#93bbff; }
+.rom .ch-return { color:var(--mm-gold); }
+
+.total-bar {
+  background:rgba(255,255,255,.04); border-radius:12px; padding:20px;
+  border:1px solid rgba(201,149,58,.25); margin-top:4px;
+}
+.total-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+.total-row:last-child { border-bottom:none; font-size:1.1rem; font-weight:800; color:#FFD580; }
+.total-row span:first-child { color:var(--text-muted); font-size:.85rem; }
+
+.scenario-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+.sc-pill {
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; padding:8px 14px; cursor:pointer;
+  font-size:.8rem; transition:all .15s; text-align:center;
+}
+.sc-pill:hover { background:rgba(201,149,58,.15); border-color:var(--mm-gold); }
+.sc-pill strong { display:block; font-size:1rem; color:#FFD580; }
+
+/* ── Insight callout ── */
+.insight-box {
+  background:rgba(201,149,58,.08); border:1px solid rgba(201,149,58,.25);
+  border-radius:12px; padding:16px 20px;
+}
+
+/* ── Product bar ── */
+.prod-bar-wrap { margin-bottom:10px; }
+.prod-bar-row  { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.prod-bar-name { font-size:.78rem; color:var(--text-muted); width:200px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prod-bar-bg   { flex:1; height:10px; background:rgba(255,255,255,.08); border-radius:5px; overflow:hidden; }
+.prod-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--mm-red),var(--mm-gold)); transition:width .8s ease; }
+.prod-bar-pct  { font-size:.75rem; color:var(--mm-gold); font-weight:700; width:40px; text-align:right; }
+
+@keyframes titleShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.hero-title {
+  background: linear-gradient(90deg, #C9953A 20%, #FFD580 40%, #fff8e7 50%, #FFD580 60%, #C9953A 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShimmer 4s linear infinite;
+}
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--dark-bg); }
+::-webkit-scrollbar-thumb { background:var(--card-br); border-radius:3px; }
+
+/* ── Exec summary ribbon ── */
+.exec-ribbon {
+  background:linear-gradient(90deg,#8B1A1A,#C9953A);
+  padding:14px 24px; font-weight:700; font-size:.9rem;
+}
+
+/* ── Sticky Nav ── */
+.sticky-nav {
+  position:sticky; top:0; z-index:100;
+  background:rgba(14,10,6,.92); backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(201,149,58,.2);
+  padding:0 24px;
+}
+.sticky-nav ul { display:flex; gap:4px; list-style:none; margin:0; padding:0; overflow-x:auto; }
+.sticky-nav ul::-webkit-scrollbar { display:none; }
+.sticky-nav li a {
+  display:block; padding:12px 16px;
+  color:var(--text-muted); font-size:.78rem; font-weight:600;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.07em;
+  border-bottom:2px solid transparent;
+  transition:color .2s, border-color .2s; white-space:nowrap;
+}
+.sticky-nav li a:hover,
+.sticky-nav li a.active { color:#FFD580; border-bottom-color:var(--mm-gold); }
+
+/* ── Glow metrics ── */
+.glow-gold {
+  text-shadow: 0 0 24px rgba(201,149,58,.55), 0 0 6px rgba(255,213,128,.3);
+}
+.glow-green { text-shadow: 0 0 20px rgba(74,222,128,.4); }
+.glow-blue  { text-shadow: 0 0 20px rgba(147,187,255,.4); }
+
+/* ── Animated spotlight card border ── */
+@keyframes borderShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.kpi-card.spotlight {
+  position:relative; overflow:visible;
+}
+.kpi-card.spotlight::after {
+  content:'';
+  position:absolute; inset:-1px; border-radius:calc(var(--radius) + 1px);
+  background: linear-gradient(120deg, #C9953A, #FFD580, #8B1A1A, #C9953A);
+  background-size:300% 300%;
+  animation:borderShimmer 4s ease infinite;
+  z-index:-1; opacity:.6;
+}
+
+/* ── Scroll reveal ── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ── KPI card inner glow on hover ── */
+.kpi-card:hover {
+  background: linear-gradient(135deg, #1A1208 0%, #251608 100%);
+}
+.kpi-card.spotlight:hover {
+  background: linear-gradient(135deg, #1A1208 0%, #2A1A05 100%);
+  box-shadow:0 0 0 1px rgba(201,149,58,.4), 0 16px 48px rgba(201,149,58,.2);
+}
+
+/* ── Metric counter ── */
+.metric-counter { display:inline-block; }
+
+/* ── Progress bar shimmer ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.prod-bar-fill {
+  background: linear-gradient(90deg, var(--mm-red), var(--mm-gold), #FFD580, var(--mm-gold), var(--mm-red));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Section divider ── */
+section { scroll-margin-top: 52px; }
+
+/* ── Hero stat glow ── */
+.hero-stat-glow .metric {
+  text-shadow: 0 0 30px rgba(255,213,128,.5), 0 2px 8px rgba(0,0,0,.6);
+}
+
+/* ── Insight callout upgrade ── */
+.insight-box {
+  position:relative; overflow:hidden;
+}
+.insight-box::before {
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,#C9953A,#8B1A1A);
+  border-radius:2px;
+}
+
+/* ── Exec ribbon scroll ── */
+@keyframes scrollRibbon {
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+.ribbon-inner { display:flex; gap:32px; white-space:nowrap; animation:scrollRibbon 28s linear infinite; width:max-content; }
+.ribbon-inner:hover { animation-play-state:paused; }
+.exec-ribbon { overflow:hidden; padding:14px 0; }
+
+/* ── Category insight cards ── */
+#category .kpi-card { transition:transform .2s, box-shadow .2s; }
+#category .kpi-card:hover { transform:translateY(-4px) scale(1.02); box-shadow:0 12px 32px rgba(0,0,0,.4); }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ══════ HERO ══════ -->
+<header class="hero text-white px-6 py-12 relative z-10">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div class="wax-seal">🥃</div>
+        <div>
+          <p class="text-xs tracking-widest uppercase opacity-60 mb-1">Walmart Connect · Beam Suntory</p>
+          <h1 class="serif text-4xl font-black leading-tight hero-title">Maker's Mark</h1>
+          <p class="text-lg opacity-80 mt-1">Q4 2025 Campaign Dashboard</p>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <span class="badge badge-gold"><i class="fas fa-star"></i> Q4 2025 SPOTLIGHT</span>
+        <span class="badge badge-blue"><i class="fas fa-chart-bar"></i> vs. Q4 2024 Comparison</span>
+        <p class="text-xs opacity-50 mt-1">Oct 1 – Dec 31, 2025 · Walmart DSP via The Trade Desk</p>
+      </div>
+    </div>
+
+    <!-- Hero KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+      <div class="kpi-card spotlight hero-stat-glow">
+        <div class="label">Impressions Delivered</div>
+        <div class="metric glow-gold">210.5M</div>
+        <div class="sub">+38.7% vs Q4 2024 <span class="yoy-pill yoy-up">↑</span></div>
+      </div>
+      <div class="kpi-card spotlight hero-stat-glow">
+        <div class="label">Overall Sales Lift</div>
+        <div class="metric glow-gold">+13.30%</div>
+        <div class="sub">100% stat. significance</div>
+      </div>
+      <div class="kpi-card spotlight hero-stat-glow">
+        <div class="label">Total Ad-Exposed Buyers</div>
+        <div class="metric glow-gold">88.1K</div>
+        <div class="sub">65% were new buyers <span class="yoy-pill yoy-up">↑ 4pts</span></div>
+      </div>
+      <div class="kpi-card spotlight hero-stat-glow">
+        <div class="label">Incremental Sales</div>
+        <div class="metric glow-gold">$221K</div>
+        <div class="sub">Halo + Featured items</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Sticky Nav -->
+<nav class="sticky-nav" aria-label="Dashboard sections">
+  <ul class="max-w-7xl mx-auto">
+    <li><a href="#spotlight">🥃 Q4 2025 Spotlight</a></li>
+    <li><a href="#yoy">📊 Year-over-Year</a></li>
+    <li><a href="#calculator">💡 Investment Calc</a></li>
+    <li><a href="#skus">📦 Top SKUs</a></li>
+    <li><a href="#category">🏆 Category Intel</a></li>
+    <li><a href="#recs">🎯 Recommendations</a></li>
+  </ul>
+</nav>
+
+<!-- Exec ribbon (scrolling ticker) -->
+<div class="exec-ribbon">
+  <div class="ribbon-inner" aria-label="Key highlights">
+    <span><i class="fas fa-trophy mr-2 opacity-80"></i>Q4 2025 drove <strong>210.5M impressions</strong> — Maker's Mark grew reach +38.7% YoY</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-users mr-2 opacity-80"></i><strong>65% of all buyers were new</strong> — strongest new buyer rate in measured history</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-arrow-trend-up mr-2 opacity-80"></i>Online sales lift <strong>+68.63%</strong> for halo set — outstanding digital demand signal</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-bolt mr-2 opacity-80"></i>ROM iROAS <strong>$10.05</strong> — NCS-verified, industry-leading incrementality</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-fire mr-2 opacity-80"></i>Featured Items in-store lift <strong>+15.78%</strong> — 100% statistical significance</span>
+    <span class="opacity-50">✦</span>
+    <!-- duplicate for seamless loop -->
+    <span><i class="fas fa-trophy mr-2 opacity-80"></i>Q4 2025 drove <strong>210.5M impressions</strong> — Maker's Mark grew reach +38.7% YoY</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-users mr-2 opacity-80"></i><strong>65% of all buyers were new</strong> — strongest new buyer rate in measured history</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-arrow-trend-up mr-2 opacity-80"></i>Online sales lift <strong>+68.63%</strong> for halo set — outstanding digital demand signal</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-bolt mr-2 opacity-80"></i>ROM iROAS <strong>$10.05</strong> — NCS-verified, industry-leading incrementality</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-fire mr-2 opacity-80"></i>Featured Items in-store lift <strong>+15.78%</strong> — 100% statistical significance</span>
+  </div>
+</div>
+
+<!-- ══════ MAIN CONTENT ══════ -->
+<main class="max-w-7xl mx-auto px-6 py-10 space-y-14">
+
+  <!-- ══════ Q4 2025 SPOTLIGHT ══════ -->
+  <section id="spotlight" class="reveal">
+    <h2 class="section-head">Q4 2025 Campaign Spotlight</h2>
+    <p class="section-sub">Oct 1 – Dec 31, 2025 · Walmart Connect DSP · 14-day attribution window</p>
+
+    <!-- Key metrics grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div class="kpi-card spotlight col-span-1">
+        <div class="label">Traceable ROAS</div>
+        <div class="metric glow-gold">$2.32</div>
+        <div class="sub">Halo + Featured</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Traceable Sales</div>
+        <div class="metric glow-gold">$1.41M</div>
+        <div class="sub">Halo + Featured</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Conversion Lift</div>
+        <div class="metric glow-gold">+13.76%</div>
+        <div class="sub">vs. control group</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">iROAS (WMC)</div>
+        <div class="metric glow-gold">$0.36</div>
+        <div class="sub">Incremental return</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">In-Store Lift</div>
+        <div class="metric glow-gold">+8.56%</div>
+        <div class="sub">99% significance</div>
+      </div>
+      <div class="kpi-card spotlight" style="background:linear-gradient(135deg,#0A1A0A,#0F2A0F); border-color:rgba(74,222,128,.4);">
+        <div class="label">Online Lift 📈</div>
+        <div class="metric glow-green" style="color:#4ade80">+68.63%</div>
+        <div class="sub" style="color:#86efac">100% significance</div>
+      </div>
+    </div>
+
+    <!-- Channel breakdown -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-store mr-2"></i>Halo + Featured — Lift by Channel</h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">In-Store</div>
+              <div class="text-xs" style="color:var(--text-muted)">$154K incremental · 99% sig.</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:#FFD580">+8.56%</div>
+              <div class="text-xs text-green-400">+11.08% Conversion Lift</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Online (OPD)</div>
+              <div class="text-xs" style="color:var(--text-muted)">$67K incremental · 100% sig.</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:#FFD580">+68.63%</div>
+              <div class="text-xs text-green-400">+38.85% Conversion Lift</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Combined Total</div>
+              <div class="text-xs" style="color:var(--text-muted)">$221K total incremental</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-amber-400">+13.30%</div>
+              <div class="text-xs text-green-400">+13.76% Conversion Lift</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-tag mr-2"></i>Featured Items Only — Lift by Channel</h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">In-Store</div>
+              <div class="text-xs" style="color:var(--text-muted)">$216K incremental · 100% sig.</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:#FFD580">+15.78%</div>
+              <div class="text-xs text-green-400">+21.26% Conversion Lift</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Online (OPD)</div>
+              <div class="text-xs" style="color:var(--text-muted)">$18K incremental · 97-100% sig.</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:#FFD580">+12.23%</div>
+              <div class="text-xs text-green-400">+6.06% Conversion Lift</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Featured Total</div>
+              <div class="text-xs" style="color:var(--text-muted)">$233K total incremental</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-amber-400">+15.27%</div>
+              <div class="text-xs text-green-400">+18.82% Conversion Lift</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer profile -->
+    <div class="grid md:grid-cols-3 gap-4 mt-6">
+      <div class="kpi-card md:col-span-1 flex flex-col justify-between">
+        <div>
+          <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-user-plus mr-2"></i>Buyer Profile</h3>
+          <div class="text-center py-4">
+            <div class="text-6xl font-black" style="color:#FFD580">65%</div>
+            <div class="text-sm mt-2" style="color:var(--text-muted)">of ad-exposed buyers were NEW</div>
+            <div class="text-3xl font-bold mt-2">57,274</div>
+            <div class="text-xs" style="color:var(--text-muted)">new buyers acquired (Halo+Featured)</div>
+          </div>
+        </div>
+        <div class="insight-box mt-4">
+          <p class="text-xs" style="color:var(--text-muted)"><i class="fas fa-lightbulb mr-1" style="color:var(--mm-gold)"></i>88,148 total buyers across halo+featured set — growing Maker's Mark's footprint at Walmart</p>
+        </div>
+      </div>
+      <div class="kpi-card md:col-span-2">
+        <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-chart-pie mr-2"></i>Q4 2025 Buyer Segmentation</h3>
+        <div class="chart-wrap"><canvas id="buyerChart25"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ YEAR-OVER-YEAR COMPARISON ══════ -->
+  <section id="yoy" class="reveal">
+    <h2 class="section-head">Q4 2024 vs. Q4 2025 — Year-Over-Year Comparison</h2>
+    <p class="section-sub">Comparing Q4 FY25 (Oct–Dec 2024) vs. Q4 FY26 (Oct–Dec 2025) Walmart Connect campaigns</p>
+
+    <!-- YoY summary cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="kpi-card">
+        <div class="label">Impressions</div>
+        <div class="text-lg font-bold" style="color:var(--text-muted)">151.8M <span class="text-xs">2024</span></div>
+        <div class="metric text-2xl glow-gold" style="color:#FFD580">210.5M <span class="text-sm">2025</span></div>
+        <div class="sub text-green-400 font-bold">▲ +38.7% YoY</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Total Buyers</div>
+        <div class="text-lg font-bold" style="color:var(--text-muted)">71,521 <span class="text-xs">2024</span></div>
+        <div class="metric text-2xl glow-gold" style="color:#FFD580">88,148 <span class="text-sm">2025</span></div>
+        <div class="sub text-green-400 font-bold">▲ +23.2% YoY</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">New Buyer Rate</div>
+        <div class="text-lg font-bold" style="color:var(--text-muted)">61% <span class="text-xs">2024</span></div>
+        <div class="metric text-2xl glow-gold" style="color:#FFD580">65% <span class="text-sm">2025</span></div>
+        <div class="sub text-green-400 font-bold">▲ +4pts YoY</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Sales Lift (Overall)</div>
+        <div class="text-lg font-bold" style="color:var(--text-muted)">8.05% <span class="text-xs">2024</span></div>
+        <div class="metric text-2xl glow-gold" style="color:#FFD580">13.30% <span class="text-sm">2025</span></div>
+        <div class="sub text-green-400 font-bold">▲ +5.25pts YoY</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="kpi-card">
+        <h3 class="font-semibold text-sm mb-4" style="color:var(--text-muted)">Impressions & Reach</h3>
+        <div class="chart-wrap"><canvas id="impressionsChart"></canvas></div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-semibold text-sm mb-4" style="color:var(--text-muted)">Sales Lift % Comparison</h3>
+        <div class="chart-wrap"><canvas id="liftChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="kpi-card">
+        <h3 class="font-semibold text-sm mb-4" style="color:var(--text-muted)">Traceable Sales & Incremental Revenue</h3>
+        <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-semibold text-sm mb-4" style="color:var(--text-muted)">ROAS Comparison</h3>
+        <div class="chart-wrap"><canvas id="roasChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Detailed comparison table -->
+    <div class="kpi-card">
+      <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-table mr-2"></i>Full Metrics Comparison — Halo + Featured Set</h3>
+      <div class="overflow-x-auto">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Q4 2024 (Oct–Dec)</th>
+              <th>Q4 2025 (Oct–Dec)</th>
+              <th>Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-semibold">Campaign Period</td>
+              <td class="year-24">Oct 1 – Dec 31, 2024</td>
+              <td class="year-25">Oct 1 – Dec 31, 2025</td>
+              <td class="delta neutral">—</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Total Impressions</td>
+              <td class="year-24">151.8M</td>
+              <td class="year-25">210.5M</td>
+              <td class="delta up">+38.7%</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Unique Viewers</td>
+              <td class="year-24">23.1M</td>
+              <td class="year-25">N/A (text only)</td>
+              <td class="delta neutral">—</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Total Ad-Exposed Buyers</td>
+              <td class="year-24">71,521</td>
+              <td class="year-25">88,148</td>
+              <td class="delta up">+23.2%</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">New Buyer Rate</td>
+              <td class="year-24">61%</td>
+              <td class="year-25">65%</td>
+              <td class="delta up">+4pts</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Traceable Sales (Overall)</td>
+              <td class="year-24">$1,650,590</td>
+              <td class="year-25">$1,408,251</td>
+              <td class="delta down">-14.7%</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Traceable ROAS</td>
+              <td class="year-24">$2.39</td>
+              <td class="year-25">$2.32</td>
+              <td class="delta down">-$0.07</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Est. Total ROAS</td>
+              <td class="year-24">$4.05</td>
+              <td class="year-25">N/A</td>
+              <td class="delta neutral">—</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Overall Sales Lift %</td>
+              <td class="year-24">8.05%</td>
+              <td class="year-25">+13.30%</td>
+              <td class="delta up">+5.25pts ↑</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Conversion Lift %</td>
+              <td class="year-24">N/A</td>
+              <td class="year-25">+13.76%</td>
+              <td class="delta up">New metric</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Incremental Sales</td>
+              <td class="year-24">$341,258</td>
+              <td class="year-25">$221,232</td>
+              <td class="delta down">-35.2%</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">iROAS (WMC)</td>
+              <td class="year-24">$0.49</td>
+              <td class="year-25">$0.36</td>
+              <td class="delta down">-$0.13</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">In-Store Sales Lift</td>
+              <td class="year-24">8.02%</td>
+              <td class="year-25">+8.56%</td>
+              <td class="delta up">+0.54pts</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Online Sales Lift</td>
+              <td class="year-24">8.46%</td>
+              <td class="year-25">+68.63%</td>
+              <td class="delta up">+60.17pts ↑↑</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">Stat. Significance</td>
+              <td class="year-24">100%</td>
+              <td class="year-25">99–100%</td>
+              <td class="delta neutral">Maintained</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">ROM Incremental Sales (NCS)</td>
+              <td class="year-24">$7.38M</td>
+              <td class="year-25">—</td>
+              <td class="delta neutral">—</td>
+            </tr>
+            <tr>
+              <td class="font-semibold">ROM Sales Lift (NCS)</td>
+              <td class="year-24">5.0%</td>
+              <td class="year-25">—</td>
+              <td class="delta neutral">Above avg (3.16% benchmark)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ INVESTMENT CALCULATOR ══════ -->
+  <section id="calculator" class="reveal">
+    <h2 class="section-head">Investment Calculator</h2>
+    <p class="section-sub">Powered by verified Q4 2025 iROAS data from Walmart Connect & NCS Rest-of-Market measurement</p>
+
+    <div class="calc-wrap">
+      <div class="flex flex-wrap gap-4 items-start justify-between mb-6">
+        <div>
+          <div class="calc-title">💡 How Much Could You Earn?</div>
+          <div class="calc-sub">Adjust your investment and see projected incremental returns across both channels</div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="badge badge-blue">WMC iROAS: $0.36</span>
+          <span class="badge badge-gold">ROM iROAS: $10.05</span>
+        </div>
+      </div>
+
+      <!-- Slider -->
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <div class="slider-lbl">Investment Amount</div>
+          <div class="invest-display" id="invest-display">$500K</div>
+        </div>
+        <input type="range" id="invest-slider" min="50000" max="2000000" step="10000" value="500000"
+               oninput="updateCalc()" style="--pct:23.7%"/>
+        <div class="flex justify-between text-xs mt-2" style="color:var(--text-muted)">
+          <span>$50K</span><span>$500K</span><span>$1M</span><span>$1.5M</span><span>$2M</span>
+        </div>
+      </div>
+
+      <!-- Scenario pills -->
+      <div class="scenario-pills mb-6">
+        <div class="sc-pill" onclick="setInvest(100000)"><strong id="pill-100k">—</strong>$100K</div>
+        <div class="sc-pill" onclick="setInvest(250000)"><strong id="pill-250k">—</strong>$250K</div>
+        <div class="sc-pill" onclick="setInvest(500000)"><strong id="pill-500k">—</strong>$500K</div>
+        <div class="sc-pill" onclick="setInvest(692000)"><strong id="pill-692k">—</strong>$692K <small style="color:var(--text-muted)">(Q4'24)</small></div>
+        <div class="sc-pill" onclick="setInvest(1000000)"><strong id="pill-1m">—</strong>$1M</div>
+      </div>
+
+      <!-- Channel cards -->
+      <div class="channel-grid">
+        <div class="channel-card wmc">
+          <div class="ch-icon wmc"><i class="fas fa-store text-blue-400"></i></div>
+          <div class="ch-name">Walmart Connect</div>
+          <div class="ch-iroas">iROAS: <span style="color:#93bbff">$0.36</span> <span class="text-xs" style="color:var(--text-muted)">per $1 invested</span></div>
+          <div class="ch-return-lbl">Projected Incremental Return</div>
+          <div class="ch-return wmc" id="wmc-return">—</div>
+          <div class="mt-3 text-xs" style="color:var(--text-muted)">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>Investment</span><span id="wmc-invest-lbl" class="text-white">—</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>iROAS</span><span style="color:#93bbff">$0.36</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span>Net Incremental</span><span id="wmc-net" class="text-green-400">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="channel-card rom">
+          <div class="ch-icon rom"><i class="fas fa-globe" style="color:var(--mm-gold)"></i></div>
+          <div class="ch-name">Rest of Market (NCS)</div>
+          <div class="ch-iroas">iROAS: <span style="color:var(--mm-gold)">$10.05</span> <span class="text-xs" style="color:var(--text-muted)">per $1 invested</span></div>
+          <div class="ch-return-lbl">Projected Incremental Return</div>
+          <div class="ch-return rom" id="rom-return">—</div>
+          <div class="mt-3 text-xs" style="color:var(--text-muted)">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>Investment</span><span id="rom-invest-lbl" class="text-white">—</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>iROAS</span><span style="color:var(--mm-gold)">$10.05</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span>Net Incremental</span><span id="rom-net" class="text-green-400">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totals bar -->
+      <div class="total-bar mt-4">
+        <div class="total-row"><span>Walmart Connect Return</span><span id="tb-wmc" class="text-blue-400 font-bold">—</span></div>
+        <div class="total-row"><span>Rest-of-Market Return</span><span id="tb-rom" style="color:var(--mm-gold)" class="font-bold">—</span></div>
+        <div class="total-row"><span>Total Investment</span><span class="text-white font-bold" id="tb-invest">—</span></div>
+        <div class="total-row">
+          <span>🏆 Total Combined Incremental Return</span>
+          <span id="tb-total" style="color:#FFD580">—</span>
+        </div>
+        <div class="total-row">
+          <span>Blended iROAS</span>
+          <span id="tb-iroas" class="badge badge-gold">—</span>
+        </div>
+      </div>
+
+      <!-- iROAS context note -->
+      <div class="insight-box mt-5">
+        <p class="text-sm"><i class="fas fa-info-circle mr-2" style="color:var(--mm-gold)"></i>
+          <strong style="color:var(--mm-gold)">What is iROAS?</strong> Incremental Return on Ad Spend measures the sales generated <em>because</em> of the ad — isolating true incrementality vs. sales that would have happened anyway.
+          Walmart Connect's <strong>$0.36 iROAS</strong> is verified via WMC's proprietary test-and-control methodology (Q4 2025).
+          The <strong>$10.05 ROM iROAS</strong> is NCS-verified and reflects Maker's Mark's impact across non-Walmart retailers when running Walmart DSP campaigns.
+        </p>
+      </div>
+
+      <!-- Mini chart -->
+      <div class="mt-6">
+        <h4 class="text-sm font-semibold mb-3" style="color:var(--text-muted)">Return Breakdown at Selected Investment</h4>
+        <div style="position:relative;height:160px;"><canvas id="calcChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ TOP PRODUCTS ══════ -->
+  <section id="skus" class="reveal">
+    <h2 class="section-head">Top Performing SKUs</h2>
+    <p class="section-sub">In-store detected sales share — Q4 2025, Featured Items (Halo + Featured combined)</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-store mr-2"></i>In-Store Sales Share</h3>
+        <div class="prod-bar-wrap">
+          <div class="prod-bar-row"><span class="prod-bar-name">750ml Straight Bourbon (45%)</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:43.96%"></div></div><span class="prod-bar-pct">43.96%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">1.75L Straight Bourbon (45%)</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:39.46%"></div></div><span class="prod-bar-pct">39.46%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">Maker's 46 750ml (47%)</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:8.84%"></div></div><span class="prod-bar-pct">8.84%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">375ml Bourbon (45%)</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:3.24%"></div></div><span class="prod-bar-pct">3.24%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">1L Bourbon</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:1.78%"></div></div><span class="prod-bar-pct">1.78%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">Cask Strength 750ml</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:0.86%"></div></div><span class="prod-bar-pct">0.86%</span></div>
+          <div class="prod-bar-row"><span class="prod-bar-name">MM 101 Proof w/Gift Carton</span><div class="prod-bar-bg"><div class="prod-bar-fill" style="width:0.63%"></div></div><span class="prod-bar-pct">0.63%</span></div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm text-amber-400 mb-4 uppercase tracking-wider"><i class="fas fa-laptop mr-2"></i>Basket Insight — Top Co-Purchase Categories</h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🥃</span>
+            <div><div class="font-semibold text-sm">Whiskey — Bourbon</div><div class="text-xs" style="color:var(--text-muted)">Core category affinity</div></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🎁</span>
+            <div><div class="font-semibold text-sm">Seasonal Spirits — Gift Sets</div><div class="text-xs" style="color:var(--text-muted)">Q4 holiday gifting signal</div></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🍸</span>
+            <div><div class="font-semibold text-sm">Vodka (Non-Flavor)</div><div class="text-xs" style="color:var(--text-muted)">Premium spirits crossover</div></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🌵</span>
+            <div><div class="font-semibold text-sm">Tequila — Blanco</div><div class="text-xs" style="color:var(--text-muted)">Mixed spirits shopper</div></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🍫</span>
+            <div><div class="font-semibold text-sm">Cordials — Coffee/Cream</div><div class="text-xs" style="color:var(--text-muted)">Holiday cocktail pairing</div></div>
+          </div>
+          <div class="insight-box mt-4">
+            <p class="text-xs" style="color:var(--text-muted)"><i class="fas fa-lightbulb mr-1" style="color:var(--mm-gold)"></i><strong style="color:var(--mm-gold)">Opportunity:</strong> Gift Sets co-purchases confirm strong holiday gifting intent — recommend leaning into premium gifting creative in future Q4 flights.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ CATEGORY INSIGHTS ══════ -->
+  <section id="category" class="reveal">
+    <h2 class="section-head">Whiskey Category & Competitive Insights</h2>
+    <p class="section-sub">From Q4 2024 Enhanced SLR — Category buyer behavior analysis</p>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="kpi-card text-center">
+        <div class="text-4xl font-black" style="color:#f87171">89.1%</div>
+        <div class="text-sm font-semibold mt-2">Competitor-Only Buyers</div>
+        <div class="text-xs mt-1" style="color:var(--text-muted)">of in-market whiskey buyers who saw the ad went to a competitor</div>
+        <div class="badge badge-red mt-3 justify-center">Conquesting Opportunity</div>
+      </div>
+      <div class="kpi-card text-center">
+        <div class="text-4xl font-black" style="color:#FFD580">9.0%</div>
+        <div class="text-sm font-semibold mt-2">Brand Switchers</div>
+        <div class="text-xs mt-1" style="color:var(--text-muted)">bought Maker's Mark AND a competitor</div>
+        <div class="badge badge-gold mt-3 justify-center">Cross-Brand</div>
+      </div>
+      <div class="kpi-card text-center">
+        <div class="text-4xl font-black" style="color:#4ade80">28.9%</div>
+        <div class="text-sm font-semibold mt-2">New-to-Category</div>
+        <div class="text-xs mt-1" style="color:var(--text-muted)">of competitor buyers were new to whiskey category</div>
+        <div class="badge badge-green mt-3 justify-center">Growth Signal</div>
+      </div>
+      <div class="kpi-card text-center">
+        <div class="text-4xl font-black" style="color:#93bbff">11.0%</div>
+        <div class="text-sm font-semibold mt-2">Maker's Mark Converters</div>
+        <div class="text-xs mt-1" style="color:var(--text-muted)">of in-market whiskey shoppers who saw ad bought MM</div>
+        <div class="badge badge-blue mt-3 justify-center">Brand Convert</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ RECOMMENDATIONS ══════ -->
+  <section id="recs" class="reveal">
+    <h2 class="section-head">Strategic Recommendations</h2>
+    <p class="section-sub">Based on Q4 2024 and Q4 2025 campaign learnings</p>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">🎯</div>
+        <div class="font-bold text-amber-400 mb-2">Scale Recent Buyers Targeting</div>
+        <p class="text-sm" style="color:var(--text-muted)">Recent Buyers used only 4% of spend but drove 19% of sales — the highest-efficiency audience segment by far. Allocate more budget here first.</p>
+      </div>
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">🔄</div>
+        <div class="font-bold text-amber-400 mb-2">Retarget New Buyers</div>
+        <p class="text-sm" style="color:var(--text-muted)">Q4 2024 acquired 43.6K new buyers with an estimated <strong>$548K</strong> in additional 12-month return value at a 17.3% repeat rate. Retarget Q4 2025's 57.3K new buyers.</p>
+      </div>
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">🏆</div>
+        <div class="font-bold text-amber-400 mb-2">Conquest the Category</div>
+        <p class="text-sm" style="color:var(--text-muted)">89.1% of in-market whiskey buyers chose a competitor. A dedicated conquesting strategy targeting category buyers could meaningfully shift share.</p>
+      </div>
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">📦</div>
+        <div class="font-bold text-amber-400 mb-2">Lean Into Gift Sets</div>
+        <p class="text-sm" style="color:var(--text-muted)">Gift Set co-purchase frequency in Q4 2025 signals strong gifting intent. Create Q4 creative specifically for the holiday gift-giver mindset.</p>
+      </div>
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">📱</div>
+        <div class="font-bold text-amber-400 mb-2">Invest in Online/OPD</div>
+        <p class="text-sm" style="color:var(--text-muted)">Q4 2025 Online Sales Lift hit <strong>+68.63%</strong> (vs. 8.46% in 2024). This dramatic growth signals digital demand is accelerating — increase digital investment.</p>
+      </div>
+      <div class="kpi-card">
+        <div class="text-2xl mb-3">🌍</div>
+        <div class="font-bold text-amber-400 mb-2">Leverage ROM Halo Effect</div>
+        <p class="text-sm" style="color:var(--text-muted)">Q4 2024 NCS data showed <strong>$7.38M</strong> incremental at non-Walmart retailers — a massive halo effect. Walmart DSP drives broader market growth, not just Walmart.com.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer note -->
+  <footer class="text-center py-6" style="color:var(--text-muted); border-top:1px solid var(--card-br);">
+    <p class="text-xs">Maker's Mark · Beam Suntory · Walmart Connect Campaign Dashboard</p>
+    <p class="text-xs mt-1">Q4 2024 Source: Makers Mark Enhanced SLR Report_Q4FY25 · Q4 2025 Source: Beam Suntory_Maker's Mark_Q4_Combined SLR · iROAS: WMC $0.36, ROM $10.05 (NCS-verified)</p>
+    <p class="text-xs mt-1">Dashboard generated by Walmart Connect · For internal planning use only</p>
+  </footer>
+
+</main>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const WMC_IROAS  = 0.36;
+const ROM_IROAS  = 10.05;
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+function fmtShort(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + n.toFixed(0);
+}
+function setEl(id, val) { const e = document.getElementById(id); if(e) e.textContent = val; }
+function updateTrack(el) {
+  const p = ((+el.value - +el.min) / (+el.max - +el.min) * 100) + '%';
+  el.style.setProperty('--pct', p);
+}
+
+// ── CALCULATOR ───────────────────────────────────────────────────────────────
+let calcChart;
+
+function updateCalc() {
+  const slider  = document.getElementById('invest-slider');
+  const invest  = +slider.value;
+  updateTrack(slider);
+
+  const wmcRet  = invest * WMC_IROAS;
+  const romRet  = invest * ROM_IROAS;
+  const total   = wmcRet + romRet;
+  const blended = total / invest;
+
+  setEl('invest-display',  fmtShort(invest));
+  setEl('wmc-return',      fmt(wmcRet));
+  setEl('wmc-invest-lbl',  fmtShort(invest));
+  setEl('wmc-net',         fmt(wmcRet));
+  setEl('rom-return',      fmt(romRet));
+  setEl('rom-invest-lbl',  fmtShort(invest));
+  setEl('rom-net',         fmt(romRet));
+  setEl('tb-wmc',          fmt(wmcRet));
+  setEl('tb-rom',          fmt(romRet));
+  setEl('tb-invest',       fmtShort(invest));
+  setEl('tb-total',        fmt(total));
+  setEl('tb-iroas',        'Blended iROAS: $' + blended.toFixed(2));
+
+  // Scenario pills
+  [100000, 250000, 500000, 692000, 1000000].forEach(v => {
+    const id = v === 692000 ? 'pill-692k' : v === 100000 ? 'pill-100k' : v === 250000 ? 'pill-250k' : v === 500000 ? 'pill-500k' : 'pill-1m';
+    const t   = v * WMC_IROAS + v * ROM_IROAS;
+    setEl(id, fmt(t));
+  });
+
+  // Update mini chart
+  if (calcChart) {
+    calcChart.data.datasets[0].data = [wmcRet, romRet];
+    calcChart.update('none');
+  }
+}
+
+function setInvest(val) {
+  const slider = document.getElementById('invest-slider');
+  slider.value = val;
+  updateCalc();
+}
+
+// ── BUYER CHART 2025 ─────────────────────────────────────────────────────────
+function initBuyerChart() {
+  new Chart(document.getElementById('buyerChart25'), {
+    type: 'doughnut',
+    data: {
+      labels: ['New Buyers (65%)', 'Purchased 1x Prior', 'Purchased 2x Prior', 'Purchased 3x+ Prior'],
+      datasets:[{
+        data: [57274, 11877, 5330, 13667],
+        backgroundColor:['#C9953A','#8B1A1A','#0053e2','#4a3060'],
+        borderColor:'#1A1208', borderWidth:3,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{ color:'#FFD580', font:{size:11}, boxWidth:14, padding:12 } },
+        tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()}` } }
+      }
+    }
+  });
+}
+
+// ── YoY CHARTS ───────────────────────────────────────────────────────────────
+const CHART_OPTS = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{ labels:{ color:'#A8936E', font:{size:10} } } },
+  scales:{
+    x:{ grid:{ color:'rgba(255,255,255,.06)' }, ticks:{ color:'#A8936E', font:{size:10} } },
+    y:{ grid:{ color:'rgba(255,255,255,.06)' }, ticks:{ color:'#A8936E', font:{size:10} } }
+  }
+};
+
+function initYoYCharts() {
+  // Impressions
+  new Chart(document.getElementById('impressionsChart'), {
+    type:'bar',
+    data:{
+      labels:['Q4 2024','Q4 2025'],
+      datasets:[{ label:'Impressions (M)', data:[151.8,210.5],
+        backgroundColor:['rgba(139,26,26,.7)','rgba(201,149,58,.85)'],
+        borderColor:['#8B1A1A','#C9953A'], borderWidth:2, borderRadius:8 }]
+    },
+    options:{...CHART_OPTS, plugins:{...CHART_OPTS.plugins,
+      tooltip:{ callbacks:{ label:ctx=>` ${ctx.parsed.y}M impressions` } }
+    }, scales:{...CHART_OPTS.scales, y:{...CHART_OPTS.scales.y, ticks:{...CHART_OPTS.scales.y.ticks, callback:v=>v+'M'}}}}
+  });
+
+  // Sales Lift
+  new Chart(document.getElementById('liftChart'), {
+    type:'bar',
+    data:{
+      labels:['Q4 2024 (Overall)','Q4 2025 (Halo+Feat)','Q4 2024 (Featured)','Q4 2025 (Featured)'],
+      datasets:[
+        { label:'In-Store Lift', data:[8.02,8.56,13.70,15.78],
+          backgroundColor:'rgba(201,149,58,.8)', borderRadius:4 },
+        { label:'Online Lift', data:[8.46,68.63,12.32,12.23],
+          backgroundColor:'rgba(0,83,226,.8)', borderRadius:4 }
+      ]
+    },
+    options:{...CHART_OPTS, plugins:{...CHART_OPTS.plugins,
+      tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y}%` } }
+    }, scales:{...CHART_OPTS.scales, y:{...CHART_OPTS.scales.y, ticks:{...CHART_OPTS.scales.y.ticks, callback:v=>v+'%'}}}}
+  });
+
+  // Sales
+  new Chart(document.getElementById('salesChart'), {
+    type:'bar',
+    data:{
+      labels:['Q4 2024','Q4 2025'],
+      datasets:[
+        { label:'Traceable Sales', data:[1650590,1408251],
+          backgroundColor:['rgba(139,26,26,.7)','rgba(201,149,58,.85)'],
+          borderColor:['#8B1A1A','#C9953A'], borderWidth:2, borderRadius:8 },
+        { label:'Incremental Sales', data:[341258,221232],
+          backgroundColor:['rgba(200,100,100,.6)','rgba(255,213,128,.6)'],
+          borderColor:['#cc7777','#FFD580'], borderWidth:2, borderRadius:8 }
+      ]
+    },
+    options:{...CHART_OPTS, plugins:{...CHART_OPTS.plugins,
+      tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}` } }
+    }, scales:{...CHART_OPTS.scales, y:{...CHART_OPTS.scales.y, ticks:{...CHART_OPTS.scales.y.ticks, callback:v=>'$'+(v/1000).toFixed(0)+'K'}}}}
+  });
+
+  // ROAS
+  new Chart(document.getElementById('roasChart'), {
+    type:'bar',
+    data:{
+      labels:['Traceable\nROAS','Est. Total\nROAS','iROAS'],
+      datasets:[
+        { label:'Q4 2024', data:[2.39,4.05,0.49],
+          backgroundColor:'rgba(139,26,26,.7)', borderColor:'#8B1A1A', borderWidth:2, borderRadius:6 },
+        { label:'Q4 2025', data:[2.32,null,0.36],
+          backgroundColor:'rgba(201,149,58,.85)', borderColor:'#C9953A', borderWidth:2, borderRadius:6 }
+      ]
+    },
+    options:{...CHART_OPTS, plugins:{...CHART_OPTS.plugins,
+      tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: $${ctx.parsed.y}` } }
+    }, scales:{...CHART_OPTS.scales, y:{...CHART_OPTS.scales.y, ticks:{...CHART_OPTS.scales.y.ticks, callback:v=>'$'+v}}}}
+  });
+}
+
+// ── MINI CALC CHART ──────────────────────────────────────────────────────────
+function initCalcChart() {
+  calcChart = new Chart(document.getElementById('calcChart'), {
+    type:'bar',
+    data:{
+      labels:['Walmart Connect','Rest of Market'],
+      datasets:[{
+        label:'Projected Return',
+        data:[500000*WMC_IROAS, 500000*ROM_IROAS],
+        backgroundColor:['rgba(0,83,226,.75)','rgba(201,149,58,.8)'],
+        borderColor:['#0053e2','#C9953A'], borderWidth:2, borderRadius:8
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${fmt(ctx.parsed.y)}` } } },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:'#A8936E',font:{size:11}} },
+        y:{ grid:{ color:'rgba(255,255,255,.06)' }, ticks:{ color:'#A8936E', font:{size:10}, callback:v=>'$'+(v/1000).toFixed(0)+'K' } }
+      }
+    }
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initBuyerChart();
+  initYoYCharts();
+  initCalcChart();
+  updateCalc();
+
+  // ── Scroll reveal ──
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+  // ── Active nav highlight on scroll ──
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.sticky-nav a');
+  const navObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector('.sticky-nav a[href="#' + e.target.id + '"]');
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  sections.forEach(s => navObs.observe(s));
+
+  // ── Animated number counters (hero KPIs) ──
+  function animateCounter(el, target, opts) {
+    const prefix = (opts && opts.prefix) || '';
+    const suffix = (opts && opts.suffix) || '';
+    const decimals = (opts && opts.decimals) || 0;
+    if (!el) return;
+    const duration = 1600;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + (eased * target).toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const heroCards = document.querySelectorAll('.hero .kpi-card.spotlight');
+  const heroObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const metric = e.target.querySelector('.metric');
+      if (!metric || metric.dataset.animated) return;
+      metric.dataset.animated = '1';
+      const txt = metric.textContent.trim();
+      const match = txt.match(/^([+$]?)([0-9.]+)([MK%]?)$/);
+      if (match) {
+        const pre = match[1], num = match[2], suf = match[3];
+        animateCounter(metric, parseFloat(num), { prefix: pre, suffix: suf, decimals: num.indexOf('.') >= 0 ? 2 : 0 });
+      }
+      heroObs.unobserve(e.target);
+    });
+  }, { threshold: 0.5 });
+  heroCards.forEach(c => heroObs.observe(c));
+
+  // ── Smooth scroll for nav links ──
+  document.querySelectorAll('.sticky-nav a').forEach(a => {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+});
+</script>
+</body>
+</html>
