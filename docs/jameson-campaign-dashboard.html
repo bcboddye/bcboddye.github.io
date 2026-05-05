@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jameson | Campaign Performance Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap');
+
+:root {
+  --j-green:       #1A4D2E;
+  --j-green-mid:   #2A6B42;
+  --j-green-bright:#3CB371;
+  --j-gold:        #C9A84C;
+  --j-gold-light:  #E5C97A;
+  --j-cream:       #F0EDE5;
+  --wmt-blue:      #0053e2;
+  --wmt-spark:     #ffc220;
+  --dark-bg:       #050D08;
+  --card-bg:       #0C1810;
+  --card-br:       #1A3A22;
+  --text-main:     #E8F0E9;
+  --text-muted:    #7A9E82;
+  --green-ok:      #2a8703;
+  --radius:        14px;
+}
+
+* { box-sizing: border-box; }
+body { font-family:'Inter',sans-serif; background:var(--dark-bg); color:var(--text-main); margin:0; }
+h1,h2,.serif { font-family:'Playfair Display',serif; }
+
+/* ── Hero ── */
+.hero {
+  background: radial-gradient(ellipse at 70% 50%, rgba(26,77,46,.7) 0%, transparent 60%),
+              radial-gradient(ellipse at 15% 80%, rgba(201,168,76,.2) 0%, transparent 55%),
+              linear-gradient(135deg, #050D08 0%, #0D2A15 45%, #080D06 100%);
+  border-bottom: 3px solid var(--j-gold);
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0; opacity:.05;
+  background: repeating-linear-gradient(45deg,#C9A84C 0,#C9A84C 1px,transparent 0,transparent 50%);
+  background-size:22px 22px;
+}
+
+@keyframes shamrockSpin {
+  0%,100% { transform: rotate(-5deg) scale(1); }
+  50%      { transform: rotate(5deg) scale(1.05); }
+}
+.brand-seal {
+  width:90px; height:90px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, var(--j-green-mid), #0A2414);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 24px rgba(26,77,46,.8), 0 0 0 6px rgba(201,168,76,.3);
+  font-size:2.2rem; flex-shrink:0;
+  animation: shamrockSpin 4s ease-in-out infinite;
+}
+
+/* ── KPI Cards ── */
+.kpi-card {
+  background:var(--card-bg); border:1px solid var(--card-br);
+  border-radius:var(--radius); padding:24px;
+  transition:transform .2s, box-shadow .2s;
+}
+.kpi-card:hover { transform:translateY(-3px); box-shadow:0 12px 32px rgba(60,179,113,.12); }
+.kpi-card .metric { font-size:2rem; font-weight:900; color:var(--j-gold); }
+.kpi-card .label  { font-size:.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+.kpi-card .sub    { font-size:.8rem; color:var(--text-muted); margin-top:6px; }
+
+.kpi-card.spotlight {
+  border-color:var(--j-gold);
+  box-shadow: 0 0 0 1px rgba(201,168,76,.25), 0 8px 32px rgba(201,168,76,.1);
+}
+.kpi-card.spotlight .metric { color:var(--j-gold-light); }
+
+@keyframes borderShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.kpi-card.spotlight {
+  position:relative; overflow:visible;
+}
+.kpi-card.spotlight::after {
+  content:'';
+  position:absolute; inset:-1px; border-radius:calc(var(--radius) + 1px);
+  background: linear-gradient(120deg, var(--j-gold), #3CB371, var(--j-green), var(--j-gold));
+  background-size:300% 300%;
+  animation:borderShimmer 4s ease infinite;
+  z-index:-1; opacity:.5;
+}
+
+/* ── Section Headers ── */
+.section-head {
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(180deg, var(--j-gold-light), var(--j-green)) 1;
+  padding-left: 14px;
+  font-size: 1.25rem; font-weight: 800; color: var(--j-cream);
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px rgba(201,168,76,.2);
+}
+.section-sub { color:var(--text-muted); font-size:.85rem; margin-bottom:24px; padding-left:18px; }
+
+/* ── Section labels ── */
+.section-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(26,77,46,.4); border:1px solid rgba(60,179,113,.3);
+  color:#6ee09a; font-size:.7rem; font-weight:700;
+  padding:3px 10px; border-radius:99px; letter-spacing:.08em;
+  text-transform:uppercase; margin-bottom:12px;
+}
+
+/* ── Comparison Table ── */
+.comp-table { width:100%; border-collapse:collapse; }
+.comp-table th, .comp-table td { padding:11px 14px; text-align:left; border-bottom:1px solid var(--card-br); }
+.comp-table th { color:var(--text-muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; }
+.comp-table td { font-size:.88rem; }
+.comp-table tr:last-child td { border-bottom:none; }
+.comp-table .col-main { color:var(--j-gold-light); font-weight:700; }
+.comp-table .delta.up   { color:#4ade80; }
+.comp-table .delta.down { color:#f87171; }
+.comp-table .delta.neutral { color:var(--text-muted); }
+
+/* ── Chart containers ── */
+.chart-wrap { position:relative; height:220px; }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; gap:6px; border-radius:9999px; font-size:.75rem; font-weight:700; padding:4px 12px; }
+.badge-gold  { background:rgba(201,168,76,.2); color:var(--j-gold-light); border:1px solid rgba(201,168,76,.4); }
+.badge-green { background:rgba(26,77,46,.4); color:#6ee09a; border:1px solid rgba(60,179,113,.35); }
+.badge-blue  { background:rgba(0,83,226,.2); color:#93bbff; border:1px solid rgba(0,83,226,.4); }
+.badge-red   { background:rgba(220,38,38,.15); color:#fca5a5; border:1px solid rgba(220,38,38,.35); }
+
+/* ── YoY pill ── */
+.yoy-pill { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:9999px; margin-left:8px; }
+.yoy-up   { background:#166534; color:#bbf7d0; }
+.yoy-down { background:#7f1d1d; color:#fecaca; }
+
+/* ── Investment Calculator ── */
+.calc-wrap {
+  background: linear-gradient(135deg, #080F0A 0%, #0D2015 50%, #080A05 100%);
+  border:1px solid rgba(201,168,76,.3);
+  border-radius:20px; padding:32px;
+}
+.calc-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; color:var(--j-gold); margin-bottom:4px; }
+.calc-sub   { color:var(--text-muted); font-size:.85rem; margin-bottom:24px; }
+
+.slider-wrap { margin-bottom:28px; }
+.slider-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+.slider-lbl { font-size:.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; }
+.invest-display { font-size:2.8rem; font-weight:900; color:var(--j-gold-light); line-height:1; }
+
+input[type=range] {
+  width:100%; height:6px; border-radius:3px; outline:none; cursor:pointer;
+  background: linear-gradient(to right, var(--j-gold) var(--pct,30%), rgba(255,255,255,.15) var(--pct,30%));
+  -webkit-appearance:none; appearance:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none;
+  width:24px; height:24px; border-radius:50%;
+  background:#fff; border:4px solid var(--j-gold);
+  box-shadow:0 2px 10px rgba(201,168,76,.5); cursor:pointer;
+}
+
+.channel-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:640px){ .channel-grid{ grid-template-columns:1fr; } }
+
+.channel-card {
+  background:rgba(255,255,255,.04); border-radius:12px; padding:20px;
+  border:1px solid rgba(255,255,255,.08); transition:border-color .2s;
+}
+.channel-card.wmc { border-color:rgba(0,83,226,.4); }
+.channel-card.rom { border-color:rgba(201,168,76,.4); }
+
+.ch-icon  { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:12px; }
+.ch-icon.wmc { background:rgba(0,83,226,.2); }
+.ch-icon.rom { background:rgba(201,168,76,.15); }
+.ch-name  { font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted); margin-bottom:4px; }
+.ch-iroas { font-size:1rem; font-weight:700; margin-bottom:12px; }
+.ch-return-lbl { font-size:.7rem; color:var(--text-muted); }
+.ch-return { font-size:1.8rem; font-weight:900; line-height:1.1; }
+.wmc .ch-return { color:#93bbff; }
+.rom .ch-return { color:var(--j-gold); }
+
+.total-bar {
+  background:rgba(255,255,255,.03); border-radius:12px; padding:20px;
+  border:1px solid rgba(201,168,76,.2); margin-top:4px;
+}
+.total-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+.total-row:last-child { border-bottom:none; font-size:1.1rem; font-weight:800; color:var(--j-gold-light); }
+.total-row span:first-child { color:var(--text-muted); font-size:.85rem; }
+
+.scenario-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+.sc-pill {
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; padding:8px 14px; cursor:pointer;
+  font-size:.8rem; transition:all .15s; text-align:center;
+}
+.sc-pill:hover { background:rgba(201,168,76,.15); border-color:var(--j-gold); }
+.sc-pill strong { display:block; font-size:1rem; color:var(--j-gold-light); }
+
+/* ── Insight callout ── */
+.insight-box {
+  background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.22);
+  border-radius:12px; padding:16px 20px; position:relative; overflow:hidden;
+}
+.insight-box::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:linear-gradient(180deg,var(--j-gold),var(--j-green));
+}
+
+/* ── Product / channel bar ── */
+.prod-bar-wrap { margin-bottom:10px; }
+.prod-bar-row  { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.prod-bar-name { font-size:.78rem; color:var(--text-muted); width:160px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prod-bar-bg   { flex:1; height:10px; background:rgba(255,255,255,.08); border-radius:5px; overflow:hidden; }
+.prod-bar-fill { height:100%; border-radius:5px;
+  background: linear-gradient(90deg, var(--j-green), var(--j-gold), var(--j-gold-light));
+  background-size:200% 100%; animation:shimmer 3s linear infinite; }
+.prod-bar-val  { font-size:.75rem; color:var(--j-gold); font-weight:700; width:50px; text-align:right; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── Title shimmer ── */
+@keyframes titleShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.hero-title {
+  background: linear-gradient(90deg, #C9A84C 20%, #E5C97A 40%, #fff8e7 50%, #E5C97A 60%, #C9A84C 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShimmer 4s linear infinite;
+}
+
+/* ── Sticky Nav ── */
+.sticky-nav {
+  position:sticky; top:0; z-index:100;
+  background:rgba(5,13,8,.93); backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(201,168,76,.2);
+  padding:0 24px;
+}
+.sticky-nav ul { display:flex; gap:4px; list-style:none; margin:0; padding:0; overflow-x:auto; }
+.sticky-nav ul::-webkit-scrollbar { display:none; }
+.sticky-nav li a {
+  display:block; padding:12px 16px;
+  color:var(--text-muted); font-size:.78rem; font-weight:600;
+  text-decoration:none; text-transform:uppercase; letter-spacing:.07em;
+  border-bottom:2px solid transparent;
+  transition:color .2s, border-color .2s; white-space:nowrap;
+}
+.sticky-nav li a:hover,
+.sticky-nav li a.active { color:var(--j-gold-light); border-bottom-color:var(--j-gold); }
+
+/* ── Scrolling ribbon ── */
+.exec-ribbon {
+  background:linear-gradient(90deg, var(--j-green), var(--j-green-mid));
+  padding:14px 0; font-weight:700; font-size:.88rem; overflow:hidden;
+}
+@keyframes scrollRibbon {
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+.ribbon-inner { display:flex; gap:32px; white-space:nowrap; animation:scrollRibbon 32s linear infinite; width:max-content; }
+.ribbon-inner:hover { animation-play-state:paused; }
+
+/* ── Glow ── */
+.glow-gold  { text-shadow: 0 0 24px rgba(201,168,76,.55), 0 0 6px rgba(229,201,122,.3); }
+.glow-green { text-shadow: 0 0 20px rgba(74,222,128,.4); }
+.glow-blue  { text-shadow: 0 0 20px rgba(147,187,255,.4); }
+
+/* ── Scroll reveal ── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+section { scroll-margin-top: 52px; }
+
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--dark-bg); }
+::-webkit-scrollbar-thumb { background:var(--card-br); border-radius:3px; }
+
+/* ── Divider ── */
+.section-divider {
+  height:2px; border:none; margin:0;
+  background:linear-gradient(90deg, transparent, var(--j-gold), var(--j-green), transparent);
+  opacity:.4;
+}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ══════ HERO ══════ -->
+<header class="hero text-white px-6 py-12 relative z-10">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div class="brand-seal">☘️</div>
+        <div>
+          <p class="text-xs tracking-widest uppercase opacity-60 mb-1">Walmart Connect · Pernod Ricard USA</p>
+          <h1 class="serif text-4xl font-black leading-tight hero-title">Jameson Irish Whiskey</h1>
+          <p class="text-lg opacity-80 mt-1">Campaign Performance Dashboard</p>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <span class="badge badge-green"><i class="fas fa-football mr-1"></i> Fall Sports · Aug–Nov 2025</span>
+        <span class="badge badge-gold"><i class="fas fa-clover mr-1"></i> St. Patrick's Day · Feb–Mar 2025</span>
+        <p class="text-xs opacity-50 mt-1">Pernod Ricard USA · Walmart DSP · Two-Campaign Review</p>
+      </div>
+    </div>
+
+    <!-- Hero KPIs — combined highlights -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+      <div class="kpi-card spotlight">
+        <div class="label">Fall Sports Impressions</div>
+        <div class="metric glow-gold">46.3M</div>
+        <div class="sub">Aug 18 – Nov 2, 2025</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Fall Sports Sales Lift</div>
+        <div class="metric glow-gold">+11.00%</div>
+        <div class="sub">$80K incremental sales</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">SPD Impressions</div>
+        <div class="metric glow-gold">35.7M</div>
+        <div class="sub">Feb 14 – Mar 17, 2025</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">SPD Sales Lift</div>
+        <div class="metric glow-gold">+34.04%</div>
+        <div class="sub">$115.7K featured incremental</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Sticky Nav -->
+<nav class="sticky-nav" aria-label="Dashboard sections">
+  <ul class="max-w-7xl mx-auto">
+    <li><a href="#fall-sports">🏈 Fall Sports</a></li>
+    <li><a href="#spd">☘️ St. Patrick's Day</a></li>
+    <li><a href="#calculator">💡 Investment Calc</a></li>
+    <li><a href="#fall-sports">🏈 Fall Sports</a></li>
+    <li><a href="#recs">🎯 Key Learnings</a></li>
+  </ul>
+</nav>
+
+<!-- Exec ribbon -->
+<div class="exec-ribbon">
+  <div class="ribbon-inner" aria-label="Key highlights">
+    <span><i class="fas fa-trophy mr-2 opacity-80"></i>Fall Sports delivered <strong>46.3M impressions</strong> with $1.08M in traceable sales — ROAS $5.21</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-clover mr-2 opacity-80"></i>St. Patrick's Day: <strong>34.04% in-store sales lift</strong> for featured items — 100% stat. significance</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-users mr-2 opacity-80"></i>SPD campaign acquired <strong>10,571 new buyers</strong> — 40% of all ad-exposed buyers were new to Jameson</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-chart-line mr-2 opacity-80"></i>Display Standard ROAS <strong>$3.72</strong> — highest performing channel in St. Patrick's Day campaign</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-store mr-2 opacity-80"></i>SPD: <strong>$914.7K</strong> combined Halo+Featured ad-exposed sales — Traceable ROAS $2.52</span>
+    <span class="opacity-50">✦</span>
+    <!-- duplicate for seamless loop -->
+    <span><i class="fas fa-trophy mr-2 opacity-80"></i>Fall Sports delivered <strong>46.3M impressions</strong> with $1.08M in traceable sales — ROAS $5.21</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-clover mr-2 opacity-80"></i>St. Patrick's Day: <strong>34.04% in-store sales lift</strong> for featured items — 100% stat. significance</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-users mr-2 opacity-80"></i>SPD campaign acquired <strong>10,571 new buyers</strong> — 40% of all ad-exposed buyers were new to Jameson</span>
+    <span class="opacity-50">✦</span>
+    <span><i class="fas fa-chart-line mr-2 opacity-80"></i>Display Standard ROAS <strong>$3.72</strong> — highest performing channel in St. Patrick's Day campaign</span>
+  </div>
+</div>
+
+<!-- ══════ MAIN CONTENT ══════ -->
+<main class="max-w-7xl mx-auto px-6 py-10 space-y-14">
+
+  <!-- ══════ SECTION 1: FALL SPORTS ══════ -->
+  <section id="fall-sports" class="reveal">
+    <div class="section-tag">🏈 Section 1 · Fall Sports Campaign</div>
+    <h2 class="section-head">Fall Sports Display &amp; OLV Campaigns</h2>
+    <p class="section-sub">Aug 18 – Nov 2, 2025 · Pernod Ricard USA · Walmart Connect DSP · 14-day attribution window</p>
+
+    <!-- Top KPI grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="kpi-card spotlight">
+        <div class="label">Total Impressions</div>
+        <div class="metric glow-gold">46.3M</div>
+        <div class="sub">Display + OLV combined</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Traceable Sales</div>
+        <div class="metric glow-gold">$1.08M</div>
+        <div class="sub">Halo + Featured set · ROAS $5.21</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Total Sales Lift</div>
+        <div class="metric glow-gold">+11.00%</div>
+        <div class="sub">Above category benchmark</div>
+      </div>
+      <div class="kpi-card spotlight" style="background:linear-gradient(135deg,#081A0C,#0F2A10); border-color:rgba(74,222,128,.35);">
+        <div class="label">Incremental Sales 📈</div>
+        <div class="metric glow-green" style="color:#4ade80">$80K</div>
+        <div class="sub" style="color:#86efac">Featured set driven</div>
+      </div>
+    </div>
+
+    <!-- Two detail cards -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-chart-bar mr-2"></i>Featured Items Spotlight
+        </h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Featured ROAS</div>
+              <div class="text-xs" style="color:var(--text-muted)">Ad-exposed traceable return</div>
+            </div>
+            <div class="text-3xl font-black" style="color:var(--j-gold-light)">$7.73</div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Halo + Featured ROAS</div>
+              <div class="text-xs" style="color:var(--text-muted)">Combined item set</div>
+            </div>
+            <div class="text-3xl font-black" style="color:var(--j-gold-light)">$5.21</div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold">Total Sales Lift</div>
+              <div class="text-xs" style="color:var(--text-muted)">Above category benchmark</div>
+            </div>
+            <div class="text-3xl font-black text-green-400">+11.00%</div>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-lightbulb mr-2"></i>Campaign Efficiency Summary
+        </h3>
+        <div class="space-y-3">
+          <div class="insight-box">
+            <p class="text-sm"><strong style="color:var(--j-gold)">High Media Efficiency:</strong> Achieved above category benchmark ROAS performance across both Display and OLV channels, indicating strong audience targeting and creative resonance during fall sports moments.</p>
+          </div>
+          <div class="insight-box mt-3">
+            <p class="text-sm"><strong style="color:var(--j-gold)">Channels:</strong> Campaign leveraged Display (Retailer + Standard) and OLV formats to drive both brand awareness and measurable purchase behavior throughout football season.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- ══════ SECTION 2: ST. PATRICK'S DAY ══════ -->
+  <section id="spd" class="reveal">
+    <div class="section-tag">☘️ Section 2 · St. Patrick's Day Campaign</div>
+    <h2 class="section-head">St. Patrick's Day Campaign</h2>
+    <p class="section-sub">Feb 14 – Mar 17, 2025 · Pernod Ricard USA · Walmart Connect DSP · Display, OLV &amp; Audio</p>
+
+    <!-- Top KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      <div class="kpi-card spotlight col-span-1">
+        <div class="label">Investment</div>
+        <div class="metric glow-gold">$363K</div>
+        <div class="sub">Total media spend</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Impressions</div>
+        <div class="metric glow-gold">35.7M</div>
+        <div class="sub">8.1M unique viewers</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Ad-Exposed ROAS</div>
+        <div class="metric glow-gold">$2.52</div>
+        <div class="sub">Halo + Featured</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">In-Store Lift</div>
+        <div class="metric glow-gold">+34.04%</div>
+        <div class="sub">Featured items only</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">New Buyers</div>
+        <div class="metric glow-gold">40%</div>
+        <div class="sub">10,571 acquired</div>
+      </div>
+      <div class="kpi-card spotlight" style="background:linear-gradient(135deg,#081A0C,#0F2A10); border-color:rgba(74,222,128,.35);">
+        <div class="label">Incr. Sales 📈</div>
+        <div class="metric glow-green" style="color:#4ade80">$115.7K</div>
+        <div class="sub" style="color:#86efac">Featured in-store</div>
+      </div>
+    </div>
+
+    <!-- Ad-exposed performance + Incremental breakdown -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-eye mr-2"></i>Ad-Exposed Performance
+        </h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <div>
+              <div class="font-bold text-sm">Halo + Featured</div>
+              <div class="text-xs" style="color:var(--text-muted)">26,271 total buyers</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:var(--j-gold-light)">$914.7K</div>
+              <div class="text-xs text-green-400">ROAS: $2.52</div>
+            </div>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <div>
+              <div class="font-bold text-sm">Featured Items Only</div>
+              <div class="text-xs" style="color:var(--text-muted)">13,698 buyers</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:var(--j-gold-light)">$393.0K</div>
+              <div class="text-xs text-green-400">ROAS: $1.08</div>
+            </div>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <div>
+              <div class="font-bold text-sm">Overall (Key Learnings)</div>
+              <div class="text-xs" style="color:var(--text-muted)">14-day attribution</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:var(--j-gold-light)">$618.6K</div>
+              <div class="text-xs text-green-400">ROAS: $1.70</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-chart-pie mr-2"></i>Incremental Returns Breakdown
+        </h3>
+        <div class="space-y-4">
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <div>
+              <div class="font-bold text-sm">Featured — In-Store Lift</div>
+              <div class="text-xs" style="color:var(--text-muted)">iROI: $0.32</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-green-400">+34.04%</div>
+              <div class="text-xs" style="color:var(--text-muted)">$115.7K incremental</div>
+            </div>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-white/10">
+            <div>
+              <div class="font-bold text-sm">Halo + Featured Lift</div>
+              <div class="text-xs" style="color:var(--text-muted)">iROI: $0.26</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-green-400">+9.78%</div>
+              <div class="text-xs" style="color:var(--text-muted)">$95.4K incremental</div>
+            </div>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <div>
+              <div class="font-bold text-sm">Overall Sales Lift</div>
+              <div class="text-xs" style="color:var(--text-muted)">iROI: $0.26 · 8.16%</div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black" style="color:var(--j-gold-light)">$95.4K</div>
+              <div class="text-xs" style="color:var(--text-muted)">Total incremental</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer profile + chart -->
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-user-plus mr-2"></i>Buyer Profile
+        </h3>
+        <div class="text-center py-4">
+          <div class="text-6xl font-black" style="color:var(--j-gold-light)">40%</div>
+          <div class="text-sm mt-2" style="color:var(--text-muted)">of ad-exposed buyers were NEW</div>
+          <div class="text-3xl font-bold mt-3">10,571</div>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">new buyers acquired</div>
+          <div class="text-xl font-bold mt-3 text-green-400">$193.7K</div>
+          <div class="text-xs" style="color:var(--text-muted)">total new buyer sales</div>
+        </div>
+        <div class="insight-box mt-2">
+          <p class="text-xs" style="color:var(--text-muted)"><i class="fas fa-lightbulb mr-1" style="color:var(--j-gold)"></i>Avg. frequency 4.39x across 8.1M unique viewers — strong reach with optimal engagement.</p>
+        </div>
+      </div>
+      <div class="kpi-card md:col-span-2">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-chart-bar mr-2"></i>SPD Buyer Segmentation &amp; Sales by Audience
+        </h3>
+        <div class="chart-wrap"><canvas id="spdBuyerChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- ══════ INVESTMENT CALCULATOR ══════ -->
+  <section id="calculator" class="reveal">
+    <h2 class="section-head">Investment Calculator</h2>
+    <p class="section-sub">Powered by St. Patrick's Day iROAS data · Walmart Connect &amp; NCS Rest-of-Market measurement</p>
+
+    <div class="calc-wrap">
+      <div class="flex flex-wrap gap-4 items-start justify-between mb-6">
+        <div>
+          <div class="calc-title">💡 How Much Could You Earn?</div>
+          <div class="calc-sub">Adjust your St. Patrick's Day investment and see projected incremental returns across both channels</div>
+        </div>
+        <div class="flex flex-col items-end gap-1">
+          <span class="badge badge-blue">WMC iROAS: $0.57</span>
+          <span class="badge badge-gold">ROM iROAS: $2.30</span>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">☘️ St. Patrick's Day Rates</div>
+        </div>
+      </div>
+
+      <!-- Slider -->
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <div class="slider-lbl">Investment Amount</div>
+          <div class="invest-display" id="invest-display">$363K</div>
+        </div>
+        <input type="range" id="invest-slider" min="50000" max="1500000" step="10000" value="363000"
+               oninput="updateCalc()"/>
+        <div class="flex justify-between text-xs mt-2" style="color:var(--text-muted)">
+          <span>$50K</span><span>$363K</span><span>$750K</span><span>$1.1M</span><span>$1.5M</span>
+        </div>
+      </div>
+
+      <!-- Scenario pills -->
+      <div class="scenario-pills mb-6">
+        <div class="sc-pill" onclick="setInvest(100000)"><strong id="pill-100k">—</strong>$100K</div>
+        <div class="sc-pill" onclick="setInvest(250000)"><strong id="pill-250k">—</strong>$250K</div>
+        <div class="sc-pill" onclick="setInvest(363000)"><strong id="pill-363k">—</strong>$363K <small style="color:var(--text-muted)">(SPD Actual)</small></div>
+        <div class="sc-pill" onclick="setInvest(500000)"><strong id="pill-500k">—</strong>$500K</div>
+        <div class="sc-pill" onclick="setInvest(1000000)"><strong id="pill-1m">—</strong>$1M</div>
+      </div>
+
+      <!-- Channel cards -->
+      <div class="channel-grid">
+        <div class="channel-card wmc">
+          <div class="ch-icon wmc"><i class="fas fa-store text-blue-400"></i></div>
+          <div class="ch-name">Walmart Connect</div>
+          <div class="ch-iroas">iROAS: <span style="color:#93bbff">$0.57</span> <span class="text-xs" style="color:var(--text-muted)">per $1 invested</span></div>
+          <div class="ch-return-lbl">Projected Incremental Return</div>
+          <div class="ch-return wmc" id="wmc-return">—</div>
+          <div class="mt-3 text-xs" style="color:var(--text-muted)">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>Investment</span><span id="wmc-invest-lbl" class="text-white">—</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>iROAS</span><span style="color:#93bbff">$0.57</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span>Incremental Return</span><span id="wmc-net" class="text-green-400">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="channel-card rom">
+          <div class="ch-icon rom"><i class="fas fa-globe" style="color:var(--j-gold)"></i></div>
+          <div class="ch-name">Rest of Market (NCS)</div>
+          <div class="ch-iroas">iROAS: <span style="color:var(--j-gold)">$2.30</span> <span class="text-xs" style="color:var(--text-muted)">per $1 invested</span></div>
+          <div class="ch-return-lbl">Projected Incremental Return</div>
+          <div class="ch-return rom" id="rom-return">—</div>
+          <div class="mt-3 text-xs" style="color:var(--text-muted)">
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>Investment</span><span id="rom-invest-lbl" class="text-white">—</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-white/5">
+              <span>iROAS</span><span style="color:var(--j-gold)">$2.30</span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span>Incremental Return</span><span id="rom-net" class="text-green-400">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totals bar -->
+      <div class="total-bar mt-4">
+        <div class="total-row"><span>Walmart Connect Return</span><span id="tb-wmc" class="text-blue-400 font-bold">—</span></div>
+        <div class="total-row"><span>Rest-of-Market Return</span><span id="tb-rom" style="color:var(--j-gold)" class="font-bold">—</span></div>
+        <div class="total-row"><span>Total Investment</span><span class="text-white font-bold" id="tb-invest">—</span></div>
+        <div class="total-row">
+          <span>☘️ Total Combined Incremental Return</span>
+          <span id="tb-total" style="color:var(--j-gold-light)">—</span>
+        </div>
+        <div class="total-row">
+          <span>Blended iROAS</span>
+          <span id="tb-iroas" class="badge badge-gold">—</span>
+        </div>
+      </div>
+
+      <!-- Context note -->
+      <div class="insight-box mt-5">
+        <p class="text-sm"><i class="fas fa-info-circle mr-2" style="color:var(--j-gold)"></i>
+          <strong style="color:var(--j-gold)">What is iROAS?</strong> Incremental Return on Ad Spend measures the sales generated <em>because</em> of the ad — isolating true incrementality vs. sales that would have happened anyway.
+          Walmart Connect's <strong>$0.57 iROAS</strong> reflects Jameson's measured St. Patrick's Day incremental return at Walmart.
+          The <strong>$2.30 ROM iROAS</strong> is NCS-verified and captures Jameson's broader market impact beyond Walmart when running WMC campaigns.
+        </p>
+      </div>
+
+      <!-- Mini chart -->
+      <div class="mt-6">
+        <h4 class="text-sm font-semibold mb-3" style="color:var(--text-muted)">Return Breakdown at Selected Investment</h4>
+        <div style="position:relative;height:160px;"><canvas id="calcChart"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- ══════ KEY LEARNINGS ══════ -->
+  <section id="recs" class="reveal">
+    <h2 class="section-head">Key Learnings &amp; Recommendations</h2>
+    <p class="section-sub">Strategic insights across both Jameson campaigns — Fall Sports &amp; St. Patrick's Day</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Fall Sports learnings -->
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-football mr-2"></i>Fall Sports Takeaways
+        </h3>
+        <div class="space-y-3">
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">🏆</span>
+            <div>
+              <div class="font-bold text-sm">Above-Benchmark ROAS</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">Both Display and OLV exceeded category benchmarks — Jameson's targeting strategy during sports moments is highly effective at driving measurable purchase behavior.</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">📺</span>
+            <div>
+              <div class="font-bold text-sm">Display vs. OLV Efficiency</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">46.3M impressions delivered across both formats. Display drove stronger direct ROAS while OLV supported brand building — a complementary strategy for sports seasons.</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">💡</span>
+            <div>
+              <div class="font-bold text-sm">Recommendation: Scale Fall Sports</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">With $1.08M in traceable sales and 11% sales lift, fall sports is a proven performance driver. Consider increasing investment for NFL playoffs and bowl season.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPD learnings -->
+      <div class="kpi-card">
+        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+          <i class="fas fa-clover mr-2"></i>St. Patrick's Day Takeaways
+        </h3>
+        <div class="space-y-3">
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">☘️</span>
+            <div>
+              <div class="font-bold text-sm">34% In-Store Lift is Exceptional</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">A +34.04% featured items lift during SPD confirms Jameson's cultural relevance and the power of WMC targeting to drive shelf pull during this critical holiday window.</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">🎯</span>
+            <div>
+              <div class="font-bold text-sm">Display Standard: Star Channel</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">Display Standard delivered $3.72 ROAS vs. $0.65 for OLV Standard. Reallocating 20-30% of OLV budget to Display Standard could significantly increase overall campaign ROI.</div>
+            </div>
+          </div>
+          <div class="h-px bg-white/10"></div>
+          <div class="flex gap-3 items-start">
+            <span class="text-xl">👥</span>
+            <div>
+              <div class="font-bold text-sm">40% New Buyer Rate = Long-Term Value</div>
+              <div class="text-xs mt-1" style="color:var(--text-muted)">10,571 new buyers acquired at $193.7K in new buyer sales. These first-time Jameson purchasers at Walmart represent compounding LTV if retargeted throughout the year.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary metrics bar -->
+    <div class="kpi-card mt-6" style="background:linear-gradient(135deg,#080F0A,#0D2015); border-color:rgba(201,168,76,.35);">
+      <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--j-gold)">
+        <i class="fas fa-table mr-2"></i>Combined Campaign Summary
+      </h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center py-3">
+          <div class="text-3xl font-black" style="color:var(--j-gold-light)">82M+</div>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">Total Impressions (Both)</div>
+        </div>
+        <div class="text-center py-3">
+          <div class="text-3xl font-black text-green-400">$1.5M+</div>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">Combined Traceable Sales</div>
+        </div>
+        <div class="text-center py-3">
+          <div class="text-3xl font-black" style="color:var(--j-gold-light)">$195K+</div>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">Total Incremental Sales</div>
+        </div>
+        <div class="text-center py-3">
+          <div class="text-3xl font-black" style="color:var(--j-gold-light)">10.5K+</div>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">New Buyers Acquired (SPD)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="mt-16 py-8 px-6 text-center border-t" style="border-color:var(--card-br)">
+  <p class="text-xs" style="color:var(--text-muted)">
+    Jameson | Pernod Ricard USA · Walmart Connect Campaign Dashboard · Data sourced from WMC Enhanced SLR &amp; NCS Rest-of-Market measurement
+    <br/>Fall Sports: Aug 18 – Nov 2, 2025 · St. Patrick's Day: Feb 14 – Mar 17, 2025
+  </p>
+  <p class="text-xs mt-2" style="color:var(--card-br)">Built with Walmart Connect data · Powered by Code Puppy 🐶</p>
+</footer>
+
+<script>
+/* ──────────────────────────────── CHARTS ──────────────────────────────── */
+const GREEN = '#3CB371', GOLD = '#C9A84C', GOLD_L = '#E5C97A',
+      BLUE = '#93bbff', MUTED = '#7A9E82', DARK = '#0C1810';
+
+const chartDefaults = {
+  plugins: { legend: { labels: { color: '#E8F0E9', font: { size: 11 } } } },
+  scales: {
+    x: { ticks: { color: MUTED, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.06)' } },
+    y: { ticks: { color: MUTED, font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.06)' } }
+  }
+};
+
+
+/* SPD Buyer chart */
+new Chart(document.getElementById('spdBuyerChart'), {
+  type: 'bar',
+  data: {
+    labels: ['New Buyers', 'Returning Buyers', 'Total Buyers (H+F)', 'Featured Buyers'],
+    datasets: [{
+      label: 'Buyer Count',
+      data: [10571, 15700, 26271, 13698],
+      backgroundColor: [
+        'rgba(60,179,113,.75)', 'rgba(201,168,76,.55)',
+        'rgba(201,168,76,.8)', 'rgba(147,187,255,.65)'
+      ],
+      borderColor: [GREEN, GOLD, GOLD_L, BLUE],
+      borderWidth: 2, borderRadius: 6
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    plugins: { ...chartDefaults.plugins, legend: { display: false } },
+    scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, beginAtZero: true } }
+  }
+});
+
+
+/* ──────────────────────────────── SPD CALCULATOR ──────────────────────────────── */
+const WMC_IROAS = 0.57;
+const ROM_IROAS = 2.30;
+
+let calcChart = null;
+
+function fmt(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + Math.round(n/1000) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function updateCalc() {
+  const slider = document.getElementById('invest-slider');
+  const val = +slider.value;
+  const max = +slider.max;
+  const min = +slider.min;
+  const pct = ((val - min)/(max - min)*100).toFixed(1) + '%';
+  slider.style.setProperty('--pct', pct);
+
+  document.getElementById('invest-display').textContent = fmt(val);
+
+  const wmcReturn = val * WMC_IROAS;
+  const romReturn = val * ROM_IROAS;
+  const total = wmcReturn + romReturn;
+  const blended = (total / val).toFixed(2);
+
+  document.getElementById('wmc-return').textContent = fmt(wmcReturn);
+  document.getElementById('rom-return').textContent = fmt(romReturn);
+  document.getElementById('wmc-invest-lbl').textContent = fmt(val);
+  document.getElementById('rom-invest-lbl').textContent = fmt(val);
+  document.getElementById('wmc-net').textContent = fmt(wmcReturn);
+  document.getElementById('rom-net').textContent = fmt(romReturn);
+  document.getElementById('tb-wmc').textContent = fmt(wmcReturn);
+  document.getElementById('tb-rom').textContent = fmt(romReturn);
+  document.getElementById('tb-invest').textContent = fmt(val);
+  document.getElementById('tb-total').textContent = fmt(total);
+  document.getElementById('tb-iroas').textContent = '$' + blended;
+
+  // Update scenario pill labels
+  [100000, 250000, 363000, 500000, 1000000].forEach((amt, i) => {
+    const ids = ['pill-100k','pill-250k','pill-363k','pill-500k','pill-1m'];
+    const t = (amt * (WMC_IROAS + ROM_IROAS));
+    document.getElementById(ids[i]).textContent = fmt(t) + ' return';
+  });
+
+  updateCalcChart(wmcReturn, romReturn, val);
+}
+
+function setInvest(amount) {
+  document.getElementById('invest-slider').value = amount;
+  updateCalc();
+}
+
+function updateCalcChart(wmc, rom, invest) {
+  const ctx = document.getElementById('calcChart');
+  const data = {
+    labels: ['Walmart Connect Return', 'ROM Return', 'Total Investment'],
+    datasets: [{
+      data: [wmc, rom, invest],
+      backgroundColor: ['rgba(147,187,255,.75)', 'rgba(201,168,76,.75)', 'rgba(255,255,255,.12)'],
+      borderColor: [BLUE, GOLD, 'rgba(255,255,255,.2)'],
+      borderWidth: 2, borderRadius: 6
+    }]
+  };
+  if (calcChart) {
+    calcChart.data = data;
+    calcChart.update();
+  } else {
+    calcChart = new Chart(ctx, {
+      type: 'bar',
+      data,
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: MUTED, font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { color: MUTED, font: { size: 10 },
+                callback: v => v >= 1e6 ? '$'+(v/1e6).toFixed(1)+'M' : '$'+Math.round(v/1000)+'K'
+               }, grid: { color: 'rgba(255,255,255,.06)' }, beginAtZero: true }
+        }
+      }
+    });
+  }
+}
+
+/* ──────────────────────────────── SCROLL REVEAL ──────────────────────────────── */
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ──────────────────────────────── STICKY NAV ACTIVE ──────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.sticky-nav a');
+const navObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.sticky-nav a[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => navObserver.observe(s));
+
+/* Init calculator */
+updateCalc();
+</script>
+</body>
+</html>
