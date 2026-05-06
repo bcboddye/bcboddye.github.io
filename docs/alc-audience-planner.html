@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Code Puppy - Your AI-powered coding companion for desktop automation and development.">
+    <meta name="theme-color" content="#18181b">
+    <meta name="color-scheme" content="dark">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>alc-audience-planner - Sharing | Code Puppy</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/favicons/apple-touch-icon.png">
+    
+    <!-- Google Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    
+    <!-- Base Styles (order matters: globals → theme → navigation → main → page-specific) -->
+    <link rel="stylesheet" href="/static/css/globals.css?v=1778004796">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1778004796">
+    <link rel="stylesheet" href="/static/css/navigation.css?v=1778004796">
+    <link rel="stylesheet" href="/static/css/main.css?v=1778004796">
+    
+    <!-- ATMT Feedback Widget Styles (hidden on /sharing/* pages) -->
+    
+    
+    
+<link rel="stylesheet" href="/static/css/sharing.css?v=1778004796">
+<style>
+    /* Full-bleed page viewer */
+    .sh-viewer-wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg, #18181b);
+    }
+
+    .sh-viewer-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 16px;
+        background: #27272a;
+        border-bottom: 1px solid var(--color-divider);
+        flex-shrink: 0;
+        gap: 12px;
+        min-height: 44px;
+    }
+
+    .sh-viewer-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .sh-viewer-topbar-left a.sh-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--color-text-secondary);
+        text-decoration: none;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    .sh-viewer-topbar-left a.sh-back-btn:hover { color: #ffc220; }
+
+    .sh-viewer-page-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--sh-accent, #ffc220);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sh-viewer-topbar-meta {
+        font-size: 12px;
+        color: var(--color-text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .sh-viewer-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .sh-viewer-frame {
+        flex: 1;
+        width: 100%;
+        border: none;
+        background: #fff;
+    }
+
+    .sh-viewer-loading, .sh-viewer-error {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .sh-viewer-loading .material-icons {
+        font-size: 48px;
+        color: var(--sh-accent);
+        animation: sh-spin 1.5s linear infinite;
+    }
+
+    .sh-viewer-error .material-icons {
+        font-size: 64px;
+        color: #ea1100;
+    }
+
+    .sh-viewer-error h3 { color: #ea1100; margin: 0; }
+    .sh-viewer-error p { color: var(--color-text-secondary); margin: 0; }
+
+    .sh-viewer-denied .material-icons {
+        font-size: 64px;
+        color: var(--color-spark-100, #ffc220);
+    }
+    .sh-viewer-denied h3 { color: var(--color-text, #f4f4f5); margin: 0; }
+    .sh-viewer-denied p  { color: var(--color-text-secondary); margin: 0; }
+
+    /* ---- Annotation sidebar ---- */
+    .pa-sidebar {
+        position: fixed; top: 44px; right: -360px; bottom: 0; width: 340px;
+        background: #27272a; border-left: 1px solid var(--color-divider);
+        display: flex; flex-direction: column; z-index: 200;
+        transition: right 0.25s ease; overflow: hidden;
+    }
+    .pa-sidebar.open { right: 0; }
+    .pa-sidebar-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; border-bottom: 1px solid var(--color-divider); flex-shrink: 0;
+    }
+    .pa-sidebar-header h3 { margin: 0; font-size: 14px; font-weight: 600; color: #ffc220; }
+    .pa-count-badge {
+        background: #0053e2; color: #fff; font-size: 11px; font-weight: 700;
+        border-radius: 10px; padding: 1px 7px; margin-left: 6px;
+    }
+    .pa-sidebar-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .pa-sidebar-empty { color: var(--color-text-secondary); font-size: 13px; text-align: center; padding: 32px 16px; }
+    .pa-card {
+        background: #3f3f46; border-radius: 8px; padding: 12px;
+        border: 1px solid transparent; cursor: pointer; transition: border-color 0.15s;
+    }
+    .pa-card:hover { border-color: #ffc220; }
+    .pa-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .pa-avatar {
+        width: 28px; height: 28px; border-radius: 50%; background: #0053e2;
+        color: #fff; font-size: 12px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pa-card-meta { flex: 1; min-width: 0; }
+    .pa-card-author { font-size: 12px; font-weight: 600; color: #f4f4f5; }
+    .pa-card-time { font-size: 11px; color: var(--color-text-secondary); }
+    .pa-card-actions { display: flex; gap: 4px; }
+    .pa-card-actions button {
+        background: none; border: none; cursor: pointer; color: var(--color-text-secondary);
+        padding: 2px; border-radius: 4px;
+    }
+    .pa-card-actions button:hover { color: #ffc220; }
+    .pa-card-actions button.delete:hover { color: #ea1100; }
+    .pa-card-quote { font-size: 11px; color: var(--color-text-secondary); font-style: italic; margin-bottom: 4px; }
+    .pa-card-comment { font-size: 13px; color: #f4f4f5; }
+    .pa-card.pa-stale { opacity: 0.5; cursor: default; }
+    .pa-card.pa-stale:hover { border-color: rgba(255,255,255,0.08); }
+    .pa-stale-badge {
+        display: inline-flex; align-items: center; gap: 3px;
+        font-size: 10px; font-weight: 600; color: #a1a1aa;
+        background: rgba(255,255,255,0.1); border-radius: 99px;
+        padding: 1px 7px; white-space: nowrap; flex-shrink: 0;
+    }
+    /* ---- Tooltip ---- */
+    .pa-tooltip {
+        position: fixed; z-index: 9999; display: none;
+        background: #27272a; border: 1px solid #ffc220;
+        border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.5);
+    }
+    .pa-tooltip button {
+        display: flex; align-items: center; gap: 4px; padding: 6px 14px;
+        background: none; border: none; cursor: pointer;
+        color: #ffc220; font-size: 13px; font-weight: 600; white-space: nowrap;
+    }
+    .pa-tooltip button:hover { background: rgba(255,194,32,.08); border-radius: 6px; }
+    /* ---- Modal ---- */
+    .pa-modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,.6); z-index: 10000;
+        align-items: center; justify-content: center;
+    }
+    .pa-modal-overlay.open { display: flex; }
+    .pa-modal {
+        background: #27272a; border: 1px solid var(--color-divider);
+        border-radius: 12px; width: 480px; max-width: 95vw;
+        box-shadow: 0 8px 32px rgba(0,0,0,.6); display: flex; flex-direction: column;
+    }
+    .pa-modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 20px; border-bottom: 1px solid var(--color-divider);
+    }
+    .pa-modal-header h4 { margin: 0; font-size: 16px; color: #f4f4f5; }
+    .pa-modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .pa-modal-quote {
+        font-size: 13px; color: var(--color-text-secondary); font-style: italic;
+        padding: 8px 12px; background: rgba(255,255,255,.05);
+        border-left: 3px solid #ffc220; border-radius: 0 4px 4px 0;
+    }
+    .pa-modal-textarea {
+        background: #3f3f46; border: 1px solid var(--color-divider);
+        border-radius: 6px; color: #f4f4f5; font-size: 14px;
+        padding: 10px 12px; resize: vertical; min-height: 80px; width: 100%;
+        box-sizing: border-box;
+    }
+    .pa-modal-textarea:focus { outline: none; border-color: #0053e2; }
+    .pa-modal-footer {
+        display: flex; justify-content: flex-end; gap: 8px;
+        padding: 12px 20px; border-top: 1px solid var(--color-divider);
+    }
+    .pa-btn { padding: 7px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+    .pa-btn-cancel { background: #3f3f46; color: #f4f4f5; }
+    .pa-btn-cancel:hover { background: #52525b; }
+    .pa-btn-save { background: #0053e2; color: #fff; }
+    .pa-btn-save:hover { background: #1a65f5; }
+    .pa-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* ---- Toggle btn in topbar ---- */
+    .sh-icon-btn { 
+        background: none; border: none; cursor: pointer; color: var(--color-text-secondary);
+        padding: 6px; border-radius: 6px; display: flex; align-items: center;
+        position: relative;
+    }
+    .sh-icon-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .pa-toggle-badge {
+        position: absolute; top: 2px; right: 2px;
+        background: #0053e2; color: #fff; font-size: 9px; font-weight: 700;
+        border-radius: 8px; padding: 0 4px; min-width: 14px; text-align: center;
+        display: none;
+    }
+
+    /* ---- Version History Sidebar ---- */
+    .vh-sidebar {
+        position: fixed; top: 44px; right: -380px; bottom: 0; width: 360px;
+        background: #27272a; border-left: 1px solid var(--color-divider);
+        display: flex; flex-direction: column; z-index: 210;
+        transition: right 0.25s ease; overflow: hidden;
+    }
+    .vh-sidebar.open { right: 0; }
+    .vh-sidebar-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; border-bottom: 1px solid var(--color-divider); flex-shrink: 0;
+    }
+    .vh-sidebar-header h3 { margin: 0; font-size: 14px; font-weight: 600; color: #ffc220; }
+    .vh-sidebar-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+    .vh-version-card {
+        background: #3f3f46; border-radius: 8px; padding: 12px;
+        border: 2px solid transparent; transition: border-color 0.15s;
+    }
+    .vh-version-card.promoted { border-color: #ffc220; }
+    .vh-version-card-header {
+        display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .vh-version-num {
+        font-size: 14px; font-weight: 600; color: #f4f4f5;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .vh-promoted-badge {
+        background: rgba(255,194,32,0.2); color: #ffc220;
+        font-size: 11px; font-weight: 600; padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .vh-version-meta { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; }
+    .vh-version-actions { display: flex; gap: 6px; }
+    .vh-version-actions button {
+        background: none; border: 1px solid var(--color-divider); border-radius: 6px;
+        color: #d4d4d8; font-size: 12px; padding: 4px 10px;
+        cursor: pointer; display: flex; align-items: center; gap: 4px;
+        transition: all 0.15s;
+    }
+    .vh-version-actions button:hover { border-color: #0053e2; color: #fff; }
+    .vh-version-actions button.promote-btn:hover { border-color: #ffc220; color: #ffc220; }
+    .vh-version-actions button.promote-btn.active {
+        background: rgba(255,194,32,0.15); border-color: #ffc220; color: #ffc220;
+        cursor: default;
+    }
+
+    /* ---- Co-owners sidebar ---- */
+    .co-sidebar {
+        position: fixed; top: 44px; right: -380px; bottom: 0; width: 360px;
+        background: #27272a; border-left: 1px solid var(--color-divider);
+        display: flex; flex-direction: column; z-index: 210;
+        transition: right 0.25s ease; overflow: hidden;
+    }
+    .co-sidebar.open { right: 0; }
+    .co-sidebar-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; border-bottom: 1px solid var(--color-divider); flex-shrink: 0;
+    }
+    .co-sidebar-header h3 { margin: 0; font-size: 14px; font-weight: 600; color: #ffc220; }
+    .co-sidebar-body { flex: 1; overflow-y: auto; padding: 12px; }
+
+    .co-add-form {
+        display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .co-add-form input {
+        flex: 1; padding: 8px 12px; border-radius: 6px;
+        border: 1px solid var(--color-divider); background: #3f3f46;
+        color: #f4f4f5; font-size: 13px;
+    }
+    .co-add-form input:focus { outline: none; border-color: #0053e2; }
+    .co-add-form button {
+        background: #0053e2; color: #fff; border: none; border-radius: 6px;
+        padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 500;
+        white-space: nowrap;
+    }
+    .co-add-form button:hover { background: #0046c0; }
+
+    .co-owner-card {
+        display: flex; align-items: center; gap: 10px;
+        background: #3f3f46; border-radius: 8px; padding: 10px 12px;
+        margin-bottom: 8px;
+    }
+    .co-owner-avatar {
+        width: 32px; height: 32px; border-radius: 50%; background: #0053e2;
+        color: #fff; font-size: 13px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .co-owner-info { flex: 1; min-width: 0; }
+    .co-owner-id { font-size: 13px; font-weight: 500; color: #f4f4f5; }
+    .co-owner-meta { font-size: 11px; color: var(--color-text-secondary); }
+    .co-owner-remove {
+        background: none; border: none; color: var(--color-text-secondary);
+        cursor: pointer; padding: 4px; border-radius: 4px;
+    }
+    .co-owner-remove:hover { color: #ea1100; }
+    .co-sidebar-empty { color: var(--color-text-secondary); font-size: 13px; text-align: center; padding: 24px 16px; }
+
+    /* Snackbar */
+    .sh-snackbar {
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+        background: #27272a; color: #f4f4f5; padding: 12px 24px; border-radius: 8px;
+        font-size: 14px; z-index: 9999; border: 1px solid var(--color-divider);
+        opacity: 0; transition: all 0.3s ease;
+    }
+    .sh-snackbar.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .sh-snackbar.success { border-color: #2a8703; }
+    .sh-snackbar.error { border-color: #ea1100; }
+</style>
+
+
+    <!-- Security: DOMPurify + shared sanitisation helpers (must load before page scripts) -->
+    <script src="/static/vendor/purify.min.js?v=1778004796"></script>
+    <script src="/static/js/security-utils.js?v=1778004796"></script>
+
+    <!-- User context for client-side JS -->
+    
+</head>
+<body>
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Navigation (includes mobile drawer) -->
+    
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+<!-- AppBar -->
+<header class="app-bar" role="banner">
+    <div class="container-xl">
+        <nav class="toolbar" role="navigation" aria-label="Main navigation">
+            <!-- Logo -->
+            <a href="/" class="logo-link" aria-label="Code Puppy Home">
+                <img 
+                    src="/static/images/code_puppy_logo_32.png" 
+                    alt="" 
+                    class="logo-image"
+                    width="32" 
+                    height="32"
+                    loading="eager"
+                >
+                <span class="logo-text">CODE PUPPY</span>
+            </a>
+            
+            <!-- Desktop Nav Links -->
+            <div class="nav-links desktop-only">
+                
+                <a 
+                    href="/" 
+                    class="nav-link "
+                    
+                >
+                    Home
+                </a>
+                
+                <a 
+                    href="/doghouse" 
+                    class="nav-link "
+                    
+                >
+                    The Doghouse
+                </a>
+                
+                <a 
+                    href="/agents" 
+                    class="nav-link "
+                    
+                >
+                    Agents
+                </a>
+                
+                <a 
+                    href="/analytics" 
+                    class="nav-link "
+                    
+                >
+                    Analytics
+                </a>
+                
+                <a 
+                    href="/token-quota" 
+                    class="nav-link "
+                    
+                >
+                    Token Quota
+                </a>
+                
+                <a 
+                    href="/sharing" 
+                    class="nav-link active"
+                    
+                >
+                    Puppy Pages
+                </a>
+                
+                <a 
+                    href="/puppy-tales" 
+                    class="nav-link "
+                    
+                >
+                    Puppy Tales
+                </a>
+                
+                <a 
+                    href="/marketplace" 
+                    class="nav-link "
+                    
+                >
+                    Marketplace
+                </a>
+                
+                <a 
+                    href="/marketplace/my-agents" 
+                    class="nav-link "
+                    
+                >
+                    My Agents
+                </a>
+                
+            </div>
+
+            <!-- Spacer (pushes user menu to far right) -->
+            <div class="flex-grow"></div>
+
+            <!-- User Menu (desktop) -->
+            
+            
+            <!-- Mobile Menu Button -->
+            <button 
+                class="icon-button mobile-only" 
+                onclick="toggleMobileDrawer()" 
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="mobile-drawer"
+            >
+                <span class="material-icons">menu</span>
+            </button>
+        </nav>
+    </div>
+</header>
+
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="mobile-drawer" aria-hidden="true" role="dialog" aria-label="Navigation menu">
+    <div class="mobile-drawer-backdrop" onclick="closeMobileDrawer()"></div>
+    <div class="mobile-drawer-content">
+        <div class="drawer-header">
+            <a href="/" class="logo-link" onclick="closeMobileDrawer()">
+                <img src="/static/images/code_puppy_logo_32.png" alt="" width="28" height="28" class="logo-image">
+                <span class="logo-text" style="font-size: var(--font-size-base);">CODE PUPPY</span>
+            </a>
+            <button class="icon-button icon-button-sm" onclick="closeMobileDrawer()" aria-label="Close menu">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <!-- Drawer Nav Links -->
+        <nav class="drawer-nav" aria-label="Mobile navigation">
+            <ul class="drawer-list">
+                
+                <li>
+                    <a 
+                        href="/" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">home</span>
+                        <span class="drawer-text">Home</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/doghouse" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">pets</span>
+                        <span class="drawer-text">The Doghouse</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/agents" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">smart_toy</span>
+                        <span class="drawer-text">Agents</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/analytics" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">analytics</span>
+                        <span class="drawer-text">Analytics</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/token-quota" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">speed</span>
+                        <span class="drawer-text">Token Quota</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/sharing" 
+                        class="drawer-link active"
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">web</span>
+                        <span class="drawer-text">Puppy Pages</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/puppy-tales" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">auto_stories</span>
+                        <span class="drawer-text">Puppy Tales</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/marketplace" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">storefront</span>
+                        <span class="drawer-text">Marketplace</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a 
+                        href="/marketplace/my-agents" 
+                        class="drawer-link "
+                        onclick="closeMobileDrawer()"
+                    >
+                        <span class="material-icons drawer-icon" aria-hidden="true">inventory_2</span>
+                        <span class="drawer-text">My Agents</span>
+                    </a>
+                </li>
+                
+            </ul>
+        </nav>
+        <!-- Mobile User Info -->
+        
+    </div>
+</div>
+    
+    <!-- Flash Messages / Snackbar -->
+    
+
+<!-- Snackbar Container (toast notifications stack here) -->
+<div id="snackbar-container" class="snackbar-container" role="region" aria-live="polite" aria-label="Notifications">
+    
+    
+</div>
+
+<script>
+// Auto-dismiss server-rendered flash messages
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#snackbar-container .snackbar.show').forEach(function(el) {
+        setTimeout(function() {
+            el.classList.remove('show');
+            setTimeout(function() { el.remove(); }, 300);
+        }, 5000);
+    });
+});
+</script>
+    
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        
+<div class="sh-viewer-wrap">
+    <!-- Compact top bar -->
+    <div class="sh-viewer-topbar" id="sh-viewer-toolbar" style="display:none;">
+        <div class="sh-viewer-topbar-left">
+            <a href="/sharing" class="sh-back-btn" title="Back to Sharing">
+                <span class="material-icons" style="font-size:18px;">arrow_back</span>
+                Sharing
+            </a>
+            <span class="sh-viewer-page-title" id="viewer-title"></span>
+            <span class="sh-badge-access" id="viewer-access" style="font-size:11px;"></span>
+            <span class="sh-viewer-topbar-meta" id="viewer-meta"></span>
+        </div>
+        <div class="sh-viewer-topbar-right" id="viewer-actions">
+            <button class="sh-icon-btn" id="pa-sidebar-toggle" onclick="paToggleSidebar()"
+                    title="Comments" aria-label="Toggle comments" aria-expanded="false">
+                <span class="material-icons" style="font-size:18px;">comment</span>
+                <span class="pa-toggle-badge" id="pa-toggle-badge">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="sh-viewer-loading" id="sh-viewer-loading">
+        <span class="material-icons" aria-hidden="true">sync</span>
+        <p>🐶 Loading shared page...</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="sh-viewer-error" id="sh-viewer-error" style="display:none;">
+        <span class="material-icons" aria-hidden="true">error</span>
+        <h3 id="error-title">Page Not Found</h3>
+        <p id="error-message">The requested page could not be loaded.</p>
+        <a href="/sharing" class="btn btn-primary">
+            <span class="material-icons" aria-hidden="true">arrow_back</span>
+            Back to Sharing
+        </a>
+    </div>
+
+    <!-- Access Denied state -->
+    <div class="sh-viewer-error sh-viewer-denied" id="sh-viewer-denied" style="display:none;">
+        <span class="material-icons" aria-hidden="true">lock</span>
+        <h3>Access Denied</h3>
+        <p>You don't have permission to view this page.</p>
+        <a href="/sharing" class="btn btn-primary">
+            <span class="material-icons" aria-hidden="true">arrow_back</span>
+            Back to Sharing
+        </a>
+    </div>
+
+    <!-- Content iframe (fills remaining space) -->
+    <iframe
+        id="sh-viewer-frame"
+        class="sh-viewer-frame"
+        title="Shared page content"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals"
+        style="display:none;"
+    ></iframe>
+
+    <!-- Annotation sidebar -->
+    <aside class="pa-sidebar" id="pa-sidebar" role="complementary" aria-label="Page comments">
+        <div class="pa-sidebar-header">
+            <h3>💬 Comments <span class="pa-count-badge" id="pa-count-badge">0</span></h3>
+            <button class="sh-icon-btn" onclick="paToggleSidebar()" aria-label="Close comments sidebar">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="pa-sidebar-body" id="pa-sidebar-body">
+            <div class="pa-sidebar-empty" id="pa-sidebar-empty">
+                <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+                <br>Highlight text on the page to add a comment
+            </div>
+        </div>
+    </aside>
+
+    <!-- Version History Sidebar -->
+    <aside class="vh-sidebar" id="vh-sidebar" role="complementary" aria-label="Version history">
+        <div class="vh-sidebar-header">
+            <h3>📋 Version History</h3>
+            <button class="sh-icon-btn" onclick="vhToggle()" aria-label="Close version history">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="vh-sidebar-body" id="vh-sidebar-body">
+            <div class="co-sidebar-empty">Loading versions...</div>
+        </div>
+    </aside>
+
+    <!-- Co-Owners Sidebar -->
+    <aside class="co-sidebar" id="co-sidebar" role="complementary" aria-label="Co-owners">
+        <div class="co-sidebar-header">
+            <h3>👥 Co-Owners</h3>
+            <button class="sh-icon-btn" onclick="coToggle()" aria-label="Close co-owners panel">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="co-sidebar-body" id="co-sidebar-body">
+            <div class="co-sidebar-empty">Loading co-owners...</div>
+        </div>
+    </aside>
+</div>
+
+<!-- Selection tooltip -->
+<div class="pa-tooltip" id="pa-tooltip">
+    <button onclick="paOpenCommentModal()" aria-label="Add comment to selected text">
+        <span class="material-icons">add_comment</span>
+        Comment
+    </button>
+</div>
+
+<!-- Comment modal -->
+<div class="pa-modal-overlay" id="pa-modal-overlay" role="dialog" aria-modal="true" aria-label="Add or edit comment">
+    <div class="pa-modal">
+        <div class="pa-modal-header">
+            <h4 id="pa-modal-title">💬 Add Comment</h4>
+            <button class="sh-icon-btn" onclick="paCloseModal()" aria-label="Close">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="pa-modal-body">
+            <div class="pa-modal-quote" id="pa-modal-quote" style="display:none;"></div>
+            <textarea class="pa-modal-textarea" id="pa-modal-text"
+                placeholder="Write your comment..." aria-label="Comment text"></textarea>
+        </div>
+        <div class="pa-modal-footer">
+            <button class="pa-btn pa-btn-cancel" onclick="paCloseModal()">Cancel</button>
+            <button class="pa-btn pa-btn-save" id="pa-modal-save" onclick="paSaveComment()">Save</button>
+        </div>
+    </div>
+</div>
+
+    </main>
+    
+    <!-- Footer -->
+    
+    
+
+<footer class="site-footer" role="contentinfo">
+    <div class="container">
+        <div class="footer-content">
+            <!-- Brand -->
+            <div class="footer-brand">
+                <a href="/" class="footer-logo-link">
+                    <img 
+                        src="/static/images/code_puppy_logo_32.png" 
+                        alt="" 
+                        width="24" 
+                        height="24"
+                        loading="lazy"
+                    >
+                    <span class="footer-logo-text">Code Puppy</span>
+                </a>
+                <p class="footer-tagline">
+                    Your AI-powered coding companion for desktop automation and development.
+                </p>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="footer-links">
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-list">
+                    <li><a href="/doghouse">The Doghouse</a></li>
+                    <li><a href="/agents">Agents</a></li>
+                    <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/puppy-pages">Puppy Pages</a></li>
+                    <li><a href="/marketplace">Marketplace</a></li>
+                </ul>
+            </div>
+            
+            <!-- Resources -->
+            <div class="footer-links">
+                <h4 class="footer-heading">Resources</h4>
+                <ul class="footer-list">
+                    <li><a href="/agents/bigquery-explorer">BigQuery Explorer</a></li>
+                </ul>
+            </div>
+            
+            <!-- Support -->
+            <div class="footer-links">
+                <h4 class="footer-heading">Support</h4>
+                <ul class="footer-list">
+                    <li>
+                        <a href="https://walmart.enterprise.slack.com/archives/C094Y1D24JY" target="_blank" rel="noopener noreferrer">
+                            <span class="material-icons footer-icon" aria-hidden="true">chat</span>
+                            Slack: #code-puppy
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:ai-enablement@walmart.com">
+                            <span class="material-icons footer-icon" aria-hidden="true">email</span>
+                            ai-enablement@walmart.com
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Divider -->
+        <div class="footer-divider"></div>
+        
+        <!-- Copyright -->
+        <div class="footer-bottom">
+            <div class="footer-bottom-left">
+                <img 
+                    src="/static/images/walmart_gt_spark.svg" 
+                    alt="Walmart Global Tech" 
+                    width="20" 
+                    height="20"
+                    class="footer-spark"
+                >
+                <p class="footer-copyright">
+                    &copy; 2026 Walmart Inc. All rights reserved.
+                </p>
+            </div>
+            
+            <p class="footer-version">
+                v0.1.0
+            </p>
+            
+        </div>
+    </div>
+</footer>
+    
+    
+    <!-- Core JavaScript -->
+    <script>
+        // ---- Mobile Drawer ----
+        function toggleMobileDrawer() {
+            const drawer = document.getElementById('mobile-drawer');
+            const btn = document.querySelector('[aria-controls="mobile-drawer"]');
+            if (drawer.classList.contains('open')) {
+                closeMobileDrawer();
+            } else {
+                openMobileDrawer();
+            }
+        }
+        
+        function openMobileDrawer() {
+            const drawer = document.getElementById('mobile-drawer');
+            const btn = document.querySelector('[aria-controls="mobile-drawer"]');
+            drawer.classList.add('open');
+            drawer.setAttribute('aria-hidden', 'false');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+            // Focus first link for keyboard a11y
+            const firstLink = drawer.querySelector('.drawer-link');
+            if (firstLink) firstLink.focus();
+        }
+        
+        function closeMobileDrawer() {
+            const drawer = document.getElementById('mobile-drawer');
+            const btn = document.querySelector('[aria-controls="mobile-drawer"]');
+            drawer.classList.remove('open');
+            drawer.setAttribute('aria-hidden', 'true');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        
+        // ---- Snackbar / Toast ----
+        function showSnackbar(message, severity, duration) {
+            severity = severity || 'success';
+            duration = duration || 4000;
+            var icons = {
+                success: 'check_circle',
+                error: 'error',
+                warning: 'warning',
+                info: 'info'
+            };
+            var container = document.getElementById('snackbar-container');
+            var snackbar = document.createElement('div');
+            snackbar.className = 'snackbar snackbar-' + severity;
+            snackbar.setAttribute('role', 'alert');
+            // Build snackbar DOM safely (no innerHTML for user message - XSS prevention)
+            var iconSpan = document.createElement('span');
+            iconSpan.className = 'snackbar-icon material-icons';
+            iconSpan.textContent = icons[severity] || 'info';
+            var msgSpan = document.createElement('span');
+            msgSpan.className = 'snackbar-message';
+            msgSpan.textContent = message;
+            var closeBtn = document.createElement('button');
+            closeBtn.className = 'snackbar-close';
+            closeBtn.setAttribute('aria-label', 'Dismiss');
+            closeBtn.onclick = function() { snackbar.remove(); };
+            var closeIcon = document.createElement('span');
+            closeIcon.className = 'material-icons';
+            closeIcon.textContent = 'close';
+            closeBtn.appendChild(closeIcon);
+            snackbar.appendChild(iconSpan);
+            snackbar.appendChild(msgSpan);
+            snackbar.appendChild(closeBtn);
+            container.appendChild(snackbar);
+            // Trigger show animation
+            requestAnimationFrame(function() { snackbar.classList.add('show'); });
+            // Auto-dismiss
+            setTimeout(function() {
+                snackbar.classList.remove('show');
+                setTimeout(function() { snackbar.remove(); }, 300);
+            }, duration);
+        }
+        
+        // ---- Copy to Clipboard ----
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(function() {
+                showSnackbar('Copied to clipboard!', 'success');
+                if (button) {
+                    var icon = button.querySelector('.material-icons');
+                    if (icon) {
+                        var orig = icon.textContent;
+                        icon.textContent = 'check';
+                        setTimeout(function() { icon.textContent = orig; }, 2000);
+                    }
+                }
+            }).catch(function() {
+                showSnackbar('Failed to copy', 'error');
+            });
+        }
+        
+        // ---- Global Keyboard Shortcuts ----
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileDrawer();
+                closeUserMenu();
+            }
+        });
+
+        // ---- User Menu ----
+        function toggleUserMenu() {
+            var menu = document.getElementById('user-menu');
+            if (!menu) return;
+            var isOpen = menu.classList.contains('open');
+            if (isOpen) {
+                closeUserMenu();
+            } else {
+                openUserMenu();
+            }
+        }
+
+        function openUserMenu() {
+            var menu = document.getElementById('user-menu');
+            if (!menu) return;
+            menu.classList.add('open');
+            var trigger = menu.querySelector('.user-menu-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeUserMenu() {
+            var menu = document.getElementById('user-menu');
+            if (!menu) return;
+            menu.classList.remove('open');
+            var trigger = menu.querySelector('.user-menu-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(e) {
+            var menu = document.getElementById('user-menu');
+            if (menu && !menu.contains(e.target)) {
+                closeUserMenu();
+            }
+        });
+    </script>
+    
+    
+<script>
+window.PA_ANNOTATION_CONFIG = {
+    userId:          "",
+    userName:        "",
+    isAuthenticated: false,
+    pageName:        "j0h100q/alc-audience-planner",
+    iframeIds:       ['sh-viewer-frame'],
+    fsOverlayId:     null,
+};
+</script>
+<script src="/static/js/page-annotations-parent.js?v=1778004796"></script>
+<script>
+    window.SHARING_OWNER = 'j0h100q';
+    window.SHARING_PAGE_NAME = 'alc-audience-planner';
+    window.IS_AUTHENTICATED = false;
+
+    (async function() {
+        const loadingEl = document.getElementById('sh-viewer-loading');
+        const errorEl = document.getElementById('sh-viewer-error');
+        const toolbarEl = document.getElementById('sh-viewer-toolbar');
+        const frameEl = document.getElementById('sh-viewer-frame');
+
+        try {
+            const resp = await fetch(`/api/sharing/view/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`, {
+                credentials: 'include',
+            });
+            const json = await resp.json();
+
+            if (!resp.ok) {
+                if (resp.status === 403) {
+                    // If user isn't logged in, redirect to PingFed so they
+                    // can prove their identity and come back with a session.
+                    if (!window.IS_AUTHENTICATED) {
+                        const callbackUrl = encodeURIComponent(window.location.pathname);
+                        window.location.href = `/auth/login?callbackUrl=${callbackUrl}`;
+                        return;
+                    }
+                    loadingEl.style.display = 'none';
+                    document.getElementById('sh-viewer-denied').style.display = 'flex';
+                    return;
+                }
+                throw new Error(json.detail || json.message || 'Failed to load page');
+            }
+            if (!json.success) {
+                throw new Error(json.message || 'Failed to load page');
+            }
+
+            const page = json.data;
+
+            loadingEl.style.display = 'none';
+            toolbarEl.style.display = 'flex';
+            frameEl.style.display = 'block';
+
+            // Populate compact toolbar
+            document.getElementById('viewer-title').textContent = page.name;
+
+            const accessBadge = document.getElementById('viewer-access');
+            accessBadge.textContent = page.access_level;
+            accessBadge.className = `sh-badge-access ${page.access_level}`;
+
+            const meta = document.getElementById('viewer-meta');
+            const metaParts = [page.owner_name];
+            if (page.vp_name) {
+                metaParts.push(`VP: ${page.vp_name}`);
+            }
+            metaParts.push(new Date(page.updated_at).toLocaleDateString());
+            meta.textContent = metaParts.join(' · ');
+
+            // Action buttons
+            const actionsEl = document.getElementById('viewer-actions');
+            let actionsHtml = `
+                <button class="sh-icon-btn" id="pa-sidebar-toggle" onclick="paToggleSidebar()"
+                        title="Comments" aria-label="Toggle comments" aria-expanded="false"
+                        style="position:relative;">
+                    <span class="material-icons" style="font-size:18px;">comment</span>
+                    <span id="pa-toggle-badge" style="
+                        display:none; position:absolute; top:2px; right:2px;
+                        background:#0053e2; color:#fff; font-size:10px; font-weight:700;
+                        border-radius:99px; min-width:16px; height:16px;
+                        line-height:16px; text-align:center; padding:0 4px;
+                    ">0</span>
+                </button>
+                <a class="sh-icon-btn" href="/sharing/${window.SHARING_OWNER}/${window.SHARING_PAGE_NAME}/infosec" title="InfoSec">
+                    <span class="material-icons" style="font-size:18px;">shield</span>
+                </a>
+                <button class="sh-icon-btn" onclick="openInNewTab()" title="Pop out">
+                    <span class="material-icons" style="font-size:18px;">open_in_new</span>
+                </button>
+            `;
+            if (page.is_owner) {
+                actionsHtml += `
+                    <a class="sh-icon-btn" href="/sharing/${window.SHARING_OWNER}/${window.SHARING_PAGE_NAME}/analytics"
+                       title="Analytics" aria-label="View analytics for this page">
+                        <span class="material-icons" style="font-size:18px;">bar_chart</span>
+                    </a>
+                    <button class="sh-icon-btn" onclick="vhToggle()" title="Version History" aria-label="Version history">
+                        <span class="material-icons" style="font-size:18px;">history</span>
+                    </button>
+                    <button class="sh-icon-btn" onclick="coToggle()" title="Co-Owners" aria-label="Manage co-owners">
+                        <span class="material-icons" style="font-size:18px;">group</span>
+                    </button>
+                    <button class="sh-icon-btn delete" onclick="deletePage()" title="Delete">
+                        <span class="material-icons" style="font-size:18px;">delete</span>
+                    </button>
+                `;
+            }
+            actionsEl.innerHTML = actionsHtml;
+
+            // Load content via srcdoc so annotation engine can be inlined
+            await paFetchScript();
+            frameEl.srcdoc = paInjectScript(page.html_content);
+            window.SHARING_PAGE_DATA = page;
+            await paLoadAnnotations();
+
+        } catch (err) {
+            console.error('Failed to load page:', err);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'flex';
+            document.getElementById('error-title').textContent = 'Error Loading Page';
+            document.getElementById('error-message').textContent = err.message;
+        }
+    })();
+
+    function openInNewTab() {
+        const page = window.SHARING_PAGE_DATA;
+        if (!page) return;
+        const blob = new Blob([page.html_content], { type: 'text/html' });
+        window.open(URL.createObjectURL(blob), '_blank');
+    }
+
+    function deletePage() {
+        if (!confirm(`Delete "${window.SHARING_PAGE_NAME}"? This cannot be undone.`)) return;
+        fetch(`/api/sharing/pages/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        })
+        .then(r => r.json())
+        .then(json => {
+            if (json.success) { window.location.href = '/sharing'; }
+            else { alert(json.detail || json.message || 'Failed to delete'); }
+        })
+        .catch(err => alert('Delete failed: ' + err.message));
+    }
+
+    /* ============================================================
+       Version History
+       ============================================================ */
+    let vhOpen = false;
+
+    function vhToggle() {
+        vhOpen = !vhOpen;
+        document.getElementById('vh-sidebar').classList.toggle('open', vhOpen);
+        if (vhOpen) {
+            // Close other sidebars
+            document.getElementById('co-sidebar').classList.remove('open');
+            document.getElementById('pa-sidebar').classList.remove('open');
+            vhLoad();
+        }
+    }
+
+    async function vhLoad() {
+        const body = document.getElementById('vh-sidebar-body');
+        body.innerHTML = '<div class="co-sidebar-empty">Loading versions...</div>';
+        try {
+            const resp = await fetch(
+                `/api/sharing/versions/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`,
+                { credentials: 'include' }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Failed to load versions');
+
+            const versions = json.data || [];
+            if (versions.length === 0) {
+                body.innerHTML = '<div class="co-sidebar-empty">No versions found</div>';
+                return;
+            }
+
+            body.innerHTML = versions.map(v => {
+                const date = v.updated_at ? new Date(v.updated_at).toLocaleString() : 'Unknown';
+                const sizeKb = ((v.content_size || 0) / 1024).toFixed(1);
+                const promotedBadge = v.is_promoted
+                    ? '<span class="vh-promoted-badge">⭐ Live</span>'
+                    : '';
+                const promoteBtn = v.is_promoted
+                    ? `<button class="promote-btn active" disabled>
+                        <span class="material-icons" style="font-size:14px;">star</span> Live
+                       </button>`
+                    : `<button class="promote-btn" onclick="vhPromote(${v.version})">
+                        <span class="material-icons" style="font-size:14px;">star_outline</span> Promote
+                       </button>`;
+                return `
+                    <div class="vh-version-card ${v.is_promoted ? 'promoted' : ''}">
+                        <div class="vh-version-card-header">
+                            <span class="vh-version-num">v${v.version} ${promotedBadge}</span>
+                        </div>
+                        <div class="vh-version-meta">${date} · ${sizeKb} KB</div>
+                        <div class="vh-version-actions">
+                            <button onclick="vhPreview(${v.version})">
+                                <span class="material-icons" style="font-size:14px;">visibility</span> Preview
+                            </button>
+                            ${promoteBtn}
+                        </div>
+                    </div>`;
+            }).join('');
+        } catch (err) {
+            body.innerHTML = `<div class="co-sidebar-empty" style="color:#ea1100;">${err.message}</div>`;
+        }
+    }
+
+    async function vhPreview(version) {
+        try {
+            const resp = await fetch(
+                `/api/sharing/view/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}?version=${version}`,
+                { credentials: 'include' }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Failed to load version');
+            const page = json.data;
+            const frameEl = document.getElementById('sh-viewer-frame');
+            frameEl.srcdoc = typeof paInjectScript === 'function' ? paInjectScript(page.html_content) : page.html_content;
+            shSnackbar(`Previewing v${version}`, 'success');
+        } catch (err) {
+            shSnackbar(err.message, 'error');
+        }
+    }
+
+    async function vhPromote(version) {
+        try {
+            const resp = await fetch(
+                `/api/sharing/promote/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ version }),
+                }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Promote failed');
+            shSnackbar(`🐶 Version ${version} is now live!`, 'success');
+            vhLoad(); // Refresh sidebar
+            // Reload the page iframe/content to show the newly promoted version
+            setTimeout(() => { window.location.reload(); }, 600);
+        } catch (err) {
+            shSnackbar(err.message, 'error');
+        }
+    }
+
+    /* ============================================================
+       Co-Owners
+       ============================================================ */
+    let coOpen = false;
+    let coIsOriginalOwner = false;
+
+    function coToggle() {
+        coOpen = !coOpen;
+        document.getElementById('co-sidebar').classList.toggle('open', coOpen);
+        if (coOpen) {
+            document.getElementById('vh-sidebar').classList.remove('open');
+            document.getElementById('pa-sidebar').classList.remove('open');
+            coLoad();
+        }
+    }
+
+    async function coLoad() {
+        const body = document.getElementById('co-sidebar-body');
+        body.innerHTML = '<div class="co-sidebar-empty">Loading co-owners...</div>';
+
+        const page = window.SHARING_PAGE_DATA;
+        coIsOriginalOwner = page && page.is_owner;
+
+        try {
+            const resp = await fetch(
+                `/api/sharing/co-owners/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`,
+                { credentials: 'include' }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Failed to load co-owners');
+
+            const coOwners = json.data || [];
+            let html = '';
+
+            // Add form (always visible for owner/co-owners since they can add)
+            html += `
+                <div class="co-add-form">
+                    <input type="email" id="co-add-input" placeholder="user@walmart.com"
+                           aria-label="Co-owner email" />
+                    <button onclick="coAdd()">Add</button>
+                </div>
+            `;
+
+            if (coOwners.length === 0) {
+                html += '<div class="co-sidebar-empty">No co-owners yet.<br>Add someone to share management rights.</div>';
+            } else {
+                html += coOwners.map(co => {
+                    const initials = (co.co_owner_id || '?').substring(0, 2).toUpperCase();
+                    const date = co.added_at ? new Date(co.added_at).toLocaleDateString() : '';
+                    const removeBtn = coIsOriginalOwner
+                        ? `<button class="co-owner-remove" onclick="coRemove('${co.co_owner_id}')" title="Remove co-owner" aria-label="Remove ${co.co_owner_id}">
+                            <span class="material-icons" style="font-size:18px;">close</span>
+                           </button>`
+                        : '';
+                    return `
+                        <div class="co-owner-card">
+                            <div class="co-owner-avatar">${initials}</div>
+                            <div class="co-owner-info">
+                                <div class="co-owner-id">${co.co_owner_id}</div>
+                                <div class="co-owner-meta">Added ${date} by ${co.added_by_name || co.added_by || 'unknown'}</div>
+                            </div>
+                            ${removeBtn}
+                        </div>`;
+                }).join('');
+            }
+
+            body.innerHTML = html;
+        } catch (err) {
+            body.innerHTML = `<div class="co-sidebar-empty" style="color:#ea1100;">${err.message}</div>`;
+        }
+    }
+
+    async function coAdd() {
+        const input = document.getElementById('co-add-input');
+        const coOwnerId = (input.value || '').trim();
+        if (!coOwnerId) { shSnackbar('Enter a user email', 'error'); return; }
+
+        try {
+            const resp = await fetch(
+                `/api/sharing/co-owners/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ co_owner_id: coOwnerId }),
+                }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Failed to add co-owner');
+            shSnackbar(`🐶 ${coOwnerId} added as co-owner!`, 'success');
+            input.value = '';
+            coLoad();
+        } catch (err) {
+            shSnackbar(err.message, 'error');
+        }
+    }
+
+    async function coRemove(coOwnerId) {
+        if (!confirm(`Remove ${coOwnerId} as co-owner?`)) return;
+        try {
+            const resp = await fetch(
+                `/api/sharing/co-owners/${encodeURIComponent(window.SHARING_OWNER)}/${encodeURIComponent(window.SHARING_PAGE_NAME)}/${encodeURIComponent(coOwnerId)}`,
+                { method: 'DELETE', credentials: 'include' }
+            );
+            const json = await resp.json();
+            if (!resp.ok) throw new Error(json.detail || 'Failed to remove co-owner');
+            shSnackbar('🐶 Co-owner removed', 'success');
+            coLoad();
+        } catch (err) {
+            shSnackbar(err.message, 'error');
+        }
+    }
+
+    /* ============================================================
+       Snackbar helper
+       ============================================================ */
+    function shSnackbar(msg, type) {
+        const el = document.getElementById('sh-snackbar');
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'sh-snackbar show ' + (type || '');
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => { el.classList.remove('show'); }, 3500);
+    }
+</script>
+<div class="sh-snackbar" id="sh-snackbar"></div>
+
+    
+    <!-- ATMT Feedback Widget (hidden on /sharing/* pages to avoid overlap) -->
+    
+</body>
+</html>
