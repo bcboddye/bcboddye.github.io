@@ -347,8 +347,10 @@ section { scroll-margin-top: 52px; }
     <li><a href="#fall-sports">🏈 Fall Sports</a></li>
     <li><a href="#spd">☘️ St. Patrick's Day</a></li>
     <li><a href="#calculator">💡 Investment Calc</a></li>
-    <li><a href="#fall-sports">🏈 Fall Sports</a></li>
     <li><a href="#recs">🎯 Key Learnings</a></li>
+    <li><a href="#brand-perf">📊 Brand Overview</a></li>
+    <li><a href="#portfolio">🥃 Portfolio FY26</a></li>
+    <li><a href="#fy27-plan">📅 FY27 Planning</a></li>
   </ul>
 </nav>
 
@@ -819,6 +821,172 @@ section { scroll-margin-top: 52px; }
     </div>
   </section>
 
+  <hr class="section-divider"/>
+
+  <!-- ══════ SLIDE 2: BRAND PERFORMANCE OVERVIEW ══════ -->
+  <section id="brand-perf" class="reveal">
+    <div class="section-tag">📊 Slide 2 · Pernod Ricard Sales Deck</div>
+    <h2 class="section-head">Brand Performance Overview</h2>
+    <p class="section-sub">PERNOD RICARD | PERFORMANCE OVERVIEW | Feb 2025 – Jan 2026 (TY) vs. Feb 2024 – Jan 2025 (LY)</p>
+
+    <!-- Insight callout -->
+    <div class="kpi-card mb-6" style="border-color:var(--j-gold);background:rgba(201,168,76,.07)">
+      <p class="text-sm leading-relaxed" style="color:var(--text-main)">
+        <i class="fas fa-lightbulb mr-2" style="color:var(--j-gold)"></i>
+        Across Pernod Ricard brands, we saw a <strong style="color:#f87171">-5.31% decrease in GMV YoY</strong>, with the biggest drop in In-store GMV.
+        <strong style="color:#4ade80">Digital GMV showed growth</strong>, highlighting a consumer shift towards online-initiated purchases.
+      </p>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+      <div class="kpi-card">
+        <div class="label">Total GMV</div>
+        <div class="metric" style="color:#f87171">-5.27%</div>
+        <div class="sub">vs. 2024 · Total Sales Value</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Digital GMV</div>
+        <div class="metric" style="color:#4ade80">+23.19%</div>
+        <div class="sub">vs. 2024 · Digitally-initiated orders</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Digital Penetration</div>
+        <div class="metric" style="color:#4ade80">+164 bps</div>
+        <div class="sub">vs. 2024 · % of Total GMV online-initiated</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Pickup GMV</div>
+        <div class="metric" style="color:#4ade80">+23.60%</div>
+        <div class="sub">vs. 2024 · Curbside &amp; in-store pickup</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">In-store GMV</div>
+        <div class="metric" style="color:#f87171">-6.55%</div>
+        <div class="sub">vs. 2024 · In-store purchases</div>
+      </div>
+      <div class="kpi-card spotlight">
+        <div class="label">Delivery GMV</div>
+        <div class="metric">+48.98%</div>
+        <div class="sub">vs. 2024 · Home delivery orders 🚀</div>
+      </div>
+    </div>
+    <p class="text-xs pl-1" style="color:var(--text-muted)">¹ Time period: 2/1/2025 – 1/31/2026 (TY) vs. 2/1/2024 – 1/31/2025 (LY)</p>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- ══════ SLIDE 3: PORTFOLIO PERFORMANCE ══════ -->
+  <section id="portfolio" class="reveal">
+    <div class="section-tag">🥃 Slide 3 · Pernod Ricard Sales Deck</div>
+    <h2 class="section-head">Pernod Ricard Portfolio — Walmart Performance FY26</h2>
+    <p class="section-sub">Total portfolio sales: $46.89M · WMC invested spend by brand</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- Sales distribution donut -->
+      <div class="kpi-card">
+        <div class="label mb-3">Sales Distribution — $46.89M Total GMV</div>
+        <div style="position:relative;height:260px;"><canvas id="salesDistChart"></canvas></div>
+      </div>
+      <!-- WMC Spend bar -->
+      <div class="kpi-card">
+        <div class="label mb-3">WMC Spend by Brand (FY26)</div>
+        <div style="position:relative;height:260px;"><canvas id="wmcSpendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Brand performance table -->
+    <div class="kpi-card">
+      <div class="label mb-4">Brand GMV vs. Category — FY26</div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="border-bottom:1px solid var(--card-br)">
+              <th class="text-left pb-3 pr-4" style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.06em">Brand</th>
+              <th class="text-right pb-3 px-4" style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.06em">GMV % Change</th>
+              <th class="text-right pb-3 pl-4" style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.06em">Category % Change</th>
+            </tr>
+          </thead>
+          <tbody id="brand-table">
+            <tr class="border-b" style="border-color:var(--card-br)">
+              <td class="py-3 pr-4 font-medium">Malibu</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-7.75%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-7.00%</td>
+            </tr>
+            <tr class="border-b" style="border-color:var(--card-br);background:rgba(201,168,76,.05)">
+              <td class="py-3 pr-4 font-medium" style="color:var(--j-gold)">☘️ Jameson</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-5.69%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-3.68%</td>
+            </tr>
+            <tr class="border-b" style="border-color:var(--card-br)">
+              <td class="py-3 pr-4 font-medium">Absolut</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#4ade80">+1.74%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-3.14%</td>
+            </tr>
+            <tr class="border-b" style="border-color:var(--card-br)">
+              <td class="py-3 pr-4 font-medium">Kahlúa</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-3.82%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-7.16%</td>
+            </tr>
+            <tr class="border-b" style="border-color:var(--card-br)">
+              <td class="py-3 pr-4 font-medium">Seagram's</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-4.01%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-3.68%</td>
+            </tr>
+            <tr class="border-b" style="border-color:var(--card-br)">
+              <td class="py-3 pr-4 font-medium">The Glenlivet</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-5.30%</td>
+              <td class="py-3 pl-4 text-right" style="color:#f87171">-3.68%</td>
+            </tr>
+            <tr>
+              <td class="py-3 pr-4 font-medium">Skrewball</td>
+              <td class="py-3 px-4 text-right font-bold" style="color:#f87171">-4.45%</td>
+              <td class="py-3 pl-4 text-right" style="color:#4ade80">+0.15%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider"/>
+
+  <!-- ══════ SLIDE 4: FY26 vs FY27 PLANNED SUPPORT ══════ -->
+  <section id="fy27-plan" class="reveal">
+    <div class="section-tag">📅 Slide 4 · Pernod Ricard Sales Deck</div>
+    <h2 class="section-head">WMC FY26 vs. FY27 Planned Support</h2>
+    <p class="section-sub">Walmart Connect media investment by brand — actuals vs. forward plan</p>
+
+    <div class="kpi-card">
+      <div class="label mb-3">FY26 Actual vs. FY27 Planned Spend by Brand</div>
+      <div style="position:relative;height:320px;"><canvas id="fy27PlanChart"></canvas></div>
+    </div>
+
+    <!-- Quick-read summary cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+      <div class="kpi-card">
+        <div class="label">Jameson FY26</div>
+        <div class="metric">$572K</div>
+        <div class="sub">Largest brand investment</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Jameson FY27 Plan</div>
+        <div class="metric" style="color:#f87171">$65K</div>
+        <div class="sub">↓ vs. FY26 — opportunity to reinvest</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Absolut FY26</div>
+        <div class="metric">$40K</div>
+        <div class="sub">FY27 plan: $21K</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">No FY27 Plan Yet</div>
+        <div class="metric" style="color:var(--text-muted)">4 Brands</div>
+        <div class="sub">Malibu, Kahlúa, Seagram's, Skrewball</div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- Footer -->
@@ -953,6 +1121,79 @@ function updateCalcChart(wmc, rom, invest) {
     });
   }
 }
+
+/* ─────────────────── PERNOD RICARD SLIDES CHARTS ─────────────────── */
+const BRANDS = ['Malibu','Jameson','Absolut','Kahl\u00faa',"Seagram's",'Skrewball','The Glenlivet'];
+const BRAND_COLORS = [
+  'rgba(147,187,255,.8)',
+  'rgba(201,168,76,.9)',
+  'rgba(60,179,113,.8)',
+  'rgba(251,146,60,.8)',
+  'rgba(192,132,252,.8)',
+  'rgba(251,191,36,.8)',
+  'rgba(94,234,212,.8)',
+];
+const BRAND_BORDERS = ['#93bbff','#C9A84C','#3CB371','#fb923c','#c084fc','#fbbf24','#5eead4'];
+
+/* Slide 3 — Sales Distribution donut */
+new Chart(document.getElementById('salesDistChart'), {
+  type: 'doughnut',
+  data: {
+    labels: BRANDS,
+    datasets: [{ data: [13919017,10572583,7382283,5215191,2617841,2417489,1393812],
+      backgroundColor: BRAND_COLORS, borderColor: BRAND_BORDERS, borderWidth: 2, hoverOffset: 8 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '60%',
+    plugins: {
+      legend: { position:'right', labels: { color:'#E8F0E9', font:{size:10}, boxWidth:12, padding:8 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: $${(ctx.raw/1e6).toFixed(2)}M (${(ctx.raw/46900374*100).toFixed(1)}%)` } }
+    }
+  }
+});
+
+/* Slide 3 — WMC Spend bar */
+new Chart(document.getElementById('wmcSpendChart'), {
+  type: 'bar',
+  data: {
+    labels: BRANDS,
+    datasets: [{ label:'WMC Spend (FY26)', data:[61616,572247,39971,69512,0,0,0],
+      backgroundColor: BRAND_COLORS, borderColor: BRAND_BORDERS, borderWidth:2, borderRadius:6 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color:MUTED, font:{size:9}, maxRotation:30 }, grid: { color:'rgba(255,255,255,.05)' } },
+      y: { ticks: { color:MUTED, font:{size:9}, callback: v => '$'+v.toLocaleString() }, grid: { color:'rgba(255,255,255,.05)' }, beginAtZero:true }
+    }
+  }
+});
+
+/* Slide 4 — FY26 vs FY27 grouped bar */
+new Chart(document.getElementById('fy27PlanChart'), {
+  type: 'bar',
+  data: {
+    labels: BRANDS,
+    datasets: [
+      { label:'FY26 Actual Spend', data:[61616,572247,39971,69512,0,0,0],
+        backgroundColor:'rgba(201,168,76,.75)', borderColor:'#C9A84C', borderWidth:2, borderRadius:6 },
+      { label:'FY27 Planned Spend', data:[0,65280,20627,0,null,null,null],
+        backgroundColor:'rgba(60,179,113,.7)', borderColor:'#3CB371', borderWidth:2, borderRadius:6 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color:'#E8F0E9', font:{size:11}, boxWidth:14 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: $${(ctx.raw||0).toLocaleString()}` } }
+    },
+    scales: {
+      x: { ticks: { color:MUTED, font:{size:10}, maxRotation:20 }, grid: { color:'rgba(255,255,255,.05)' } },
+      y: { ticks: { color:MUTED, font:{size:10}, callback: v => '$'+v.toLocaleString() }, grid: { color:'rgba(255,255,255,.05)' }, beginAtZero:true }
+    }
+  }
+});
 
 /* ──────────────────────────────── SCROLL REVEAL ──────────────────────────────── */
 const revealObserver = new IntersectionObserver(entries => {
