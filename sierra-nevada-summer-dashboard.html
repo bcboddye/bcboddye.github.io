@@ -146,7 +146,6 @@ hr.divider { border:none; border-top:1px solid var(--card-br); margin:40px 0; }
 
 /* ── Chart ── */
 .chart-wrap { position:relative; height:220px; }
-.chart-wrap-tall { position:relative; height:270px; }
 
 /* ── Badges ── */
 .badge { display:inline-flex; align-items:center; gap:6px; border-radius:9999px; font-size:.72rem; font-weight:700; padding:4px 12px; }
@@ -283,7 +282,6 @@ input[type=range]::-webkit-slider-thumb {
     <div class="flex items-center gap-1 overflow-x-auto">
       <a class="nav-link active" href="#overview">Overview</a>
       <a class="nav-link" href="#tactics">Tactics</a>
-      <a class="nav-link" href="#sales-lift">Sales Lift</a>
       <a class="nav-link" href="#buyers">Buyers & LTV</a>
       <a class="nav-link" href="#category">Category</a>
       <a class="nav-link" href="#rom">Rest of Market</a>
@@ -583,72 +581,86 @@ input[type=range]::-webkit-slider-thumb {
 
   <hr class="divider"/>
 
-  <!-- ── SALES LIFT ── -->
-  <section id="sales-lift" class="reveal">
-    <div class="section-tag">📈 Sales Lift & Incrementality</div>
-    <h2 class="section-head">True Incremental Impact</h2>
-    <p class="section-sub">Test vs. control methodology · 10M test group / 9.9M control · Omnichannel measurement</p>
+  <!-- ── INVESTMENT CALCULATOR (moved) ── -->
+  <section id="calculator" class="reveal">
+    <div class="section-tag">💡 Incremental Investment Tool</div>
+    <h2 class="section-head">How Much Could You Earn?</h2>
+    <p class="section-sub">Based on Sierra Nevada's measured iROAS values · WMC + NCS Rest-of-Market data</p>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="kpi-card spotlight">
-        <div class="label">Sales Lift</div>
-        <div class="metric" data-editable data-key="lift_pct">+11.55%</div>
-        <div class="sub">Featured items vs. control</div>
-      </div>
-      <div class="kpi-card green-spot">
-        <div class="label">Incremental Revenue</div>
-        <div class="metric" style="color:#6ee09a" data-editable data-key="incr_rev">$459K</div>
-        <div class="sub">Would not have occurred</div>
-      </div>
-      <div class="kpi-card spotlight">
-        <div class="label">WMC iROAS</div>
-        <div class="metric" data-editable data-key="wmc_iroas">$0.44</div>
-        <div class="sub">Per $1 invested at WMC</div>
-      </div>
-      <div class="kpi-card blue-spot">
-        <div class="label">ROM iROAS</div>
-        <div class="metric" style="color:var(--sn-blue-light)" data-editable data-key="rom_iroas">$4.08</div>
-        <div class="sub">Rest-of-Market lift</div>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="kpi-card">
-        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--sn-gold)">
-          <i class="fas fa-users mr-2"></i>Methodology Snapshot
-        </h3>
-        <div class="space-y-3 mb-4">
-          <div class="flex justify-between items-center py-2 border-b border-white/8">
-            <span class="text-sm" style="color:var(--text-muted)">Test Group (Ad-Exposed)</span>
-            <span class="font-bold text-green-400">10M shoppers</span>
-          </div>
-          <div class="flex justify-between items-center py-2 border-b border-white/8">
-            <span class="text-sm" style="color:var(--text-muted)">Control Group</span>
-            <span class="font-bold" style="color:var(--sn-blue-light)">9.9M shoppers</span>
-          </div>
-          <div class="flex justify-between items-center py-2 border-b border-white/8">
-            <span class="text-sm" style="color:var(--text-muted)">Total Ad-Exposed</span>
-            <span class="font-bold">20M shoppers</span>
-          </div>
-          <div class="flex justify-between items-center py-2 border-b border-white/8">
-            <span class="text-sm" style="color:var(--text-muted)">Attribution Window</span>
-            <span class="font-bold">14 days</span>
-          </div>
-          <div class="flex justify-between items-center py-2">
-            <span class="text-sm" style="color:var(--text-muted)">Channels Tracked</span>
-            <span class="font-bold">In-Store + Online</span>
-          </div>
+    <div class="calc-wrap">
+      <div class="flex flex-wrap gap-4 items-start justify-between mb-6">
+        <div>
+          <div class="calc-title">🏔️ Sierra Nevada Investment Calculator</div>
+          <div class="calc-sub">Slide to your target investment and see projected incremental returns across both channels</div>
         </div>
-        <div class="insight-box">
-          <p class="text-xs" style="color:var(--text-muted)"><i class="fas fa-info-circle mr-1" style="color:var(--sn-gold)"></i>Sales Lift uses matched, unexposed control groups based on purchase history and propensity to buy — the gold standard for true incrementality.</p>
+        <div class="flex flex-col items-end gap-2">
+          <span class="badge badge-blue">WMC iROAS: <span id="wmc-iroas-badge" data-editable data-key="badge_wmc_iroas">$0.44</span></span>
+          <span class="badge badge-gold">ROM iROAS: <span id="rom-iroas-badge" data-editable data-key="badge_rom_iroas">$4.08</span></span>
+          <div class="text-xs mt-1" style="color:var(--text-muted)">🍺 Summer 2025 Measured Rates</div>
         </div>
       </div>
 
-      <div class="kpi-card">
-        <h3 class="font-bold text-sm mb-4 uppercase tracking-wider" style="color:var(--sn-gold)">
-          <i class="fas fa-chart-bar mr-2"></i>iROAS vs. Ad-Exposed ROAS
-        </h3>
-        <div class="chart-wrap-tall"><canvas id="roasChart"></canvas></div>
+      <!-- Slider -->
+      <div class="slider-wrap">
+        <div class="flex items-end gap-4 mb-3">
+          <div>
+            <div class="text-xs uppercase tracking-wider mb-2" style="color:var(--text-muted)">Investment Amount</div>
+            <div class="invest-display" id="invest-display">$1.05M</div>
+          </div>
+        </div>
+        <input type="range" id="invest-slider" min="50000" max="3000000" step="10000" value="1053841" oninput="updateCalc()"/>
+        <div class="flex justify-between text-xs mt-2" style="color:var(--text-muted)">
+          <span>$50K</span><span>$500K</span><span>$1M</span><span>$1.5M</span><span>$2M</span><span>$2.5M</span><span>$3M</span>
+        </div>
+      </div>
+
+      <!-- Scenario pills -->
+      <div class="flex gap-3 flex-wrap mb-6">
+        <div class="sc-pill" onclick="setInvest(250000)"><strong id="pill-250k">—</strong>$250K</div>
+        <div class="sc-pill" onclick="setInvest(500000)"><strong id="pill-500k">—</strong>$500K</div>
+        <div class="sc-pill" onclick="setInvest(1053841)"><strong id="pill-actual">—</strong>$1.05M <small style="color:var(--text-muted)">(Actual)</small></div>
+        <div class="sc-pill" onclick="setInvest(1500000)"><strong id="pill-1p5m">—</strong>$1.5M</div>
+        <div class="sc-pill" onclick="setInvest(2000000)"><strong id="pill-2m">—</strong>$2M</div>
+      </div>
+
+      <!-- Channel cards -->
+      <div class="channel-grid">
+        <div class="channel-card wmc">
+          <div class="ch-icon wmc"><i class="fas fa-store" style="color:#93bbff"></i></div>
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--text-muted)">Walmart Connect</div>
+          <div class="text-sm font-semibold mb-2">In-Store + Online (WMC iROAS)</div>
+          <div class="ch-return-lbl">Projected Incremental Returns</div>
+          <div class="ch-return" id="wmc-return">$463,691</div>
+          <div class="text-xs mt-2" style="color:var(--text-muted)">at $0.44 WMC iROAS</div>
+        </div>
+        <div class="channel-card rom">
+          <div class="ch-icon rom"><i class="fas fa-globe" style="color:var(--sn-amber)"></i></div>
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--text-muted)">Rest of Market</div>
+          <div class="text-sm font-semibold mb-2">Cross-Retailer (NCS iROAS)</div>
+          <div class="ch-return-lbl">Projected Incremental Returns</div>
+          <div class="ch-return" id="rom-return">$4,299,671</div>
+          <div class="text-xs mt-2" style="color:var(--text-muted)">at $4.08 ROM iROAS</div>
+        </div>
+      </div>
+
+      <!-- Total bar -->
+      <div class="total-bar">
+        <div class="total-row">
+          <span style="color:var(--text-muted)">WMC Incremental</span>
+          <span class="font-bold" style="color:#93bbff" id="tot-wmc">$463,691</span>
+        </div>
+        <div class="total-row">
+          <span style="color:var(--text-muted)">ROM Incremental</span>
+          <span class="font-bold" style="color:var(--sn-amber)" id="tot-rom">$4,299,671</span>
+        </div>
+        <div class="total-row" style="padding-top:12px">
+          <span class="text-base">🏆 Total Projected Incremental</span>
+          <span class="text-2xl" style="font-family:'Oswald',sans-serif" id="tot-combined">$4,763,362</span>
+        </div>
+      </div>
+
+      <div class="mt-6 insight-box">
+        <p class="text-sm"><strong style="color:var(--sn-amber)">💡 Power of the Full-Funnel:</strong> Awareness tactics (CTV, Audio, Podcasts) drive the ROM impact by building brand salience across the broader market — not just at Walmart. Pair them with lower-funnel Display + Native for maximum total-market ROI.</p>
       </div>
     </div>
   </section>
@@ -874,92 +886,6 @@ input[type=range]::-webkit-slider-thumb {
     </div>
   </section>
 
-  <hr class="divider"/>
-
-  <!-- ── INVESTMENT CALCULATOR ── -->
-  <section id="calculator" class="reveal">
-    <div class="section-tag">💡 Incremental Investment Tool</div>
-    <h2 class="section-head">How Much Could You Earn?</h2>
-    <p class="section-sub">Based on Sierra Nevada's measured iROAS values · WMC + NCS Rest-of-Market data</p>
-
-    <div class="calc-wrap">
-      <div class="flex flex-wrap gap-4 items-start justify-between mb-6">
-        <div>
-          <div class="calc-title">🏔️ Sierra Nevada Investment Calculator</div>
-          <div class="calc-sub">Slide to your target investment and see projected incremental returns across both channels</div>
-        </div>
-        <div class="flex flex-col items-end gap-2">
-          <span class="badge badge-blue">WMC iROAS: <span id="wmc-iroas-badge" data-editable data-key="badge_wmc_iroas">$0.44</span></span>
-          <span class="badge badge-gold">ROM iROAS: <span id="rom-iroas-badge" data-editable data-key="badge_rom_iroas">$4.08</span></span>
-          <div class="text-xs mt-1" style="color:var(--text-muted)">🍺 Summer 2025 Measured Rates</div>
-        </div>
-      </div>
-
-      <!-- Slider -->
-      <div class="slider-wrap">
-        <div class="flex items-end gap-4 mb-3">
-          <div>
-            <div class="text-xs uppercase tracking-wider mb-2" style="color:var(--text-muted)">Investment Amount</div>
-            <div class="invest-display" id="invest-display">$1.05M</div>
-          </div>
-        </div>
-        <input type="range" id="invest-slider" min="50000" max="3000000" step="10000" value="1053841" oninput="updateCalc()"/>
-        <div class="flex justify-between text-xs mt-2" style="color:var(--text-muted)">
-          <span>$50K</span><span>$500K</span><span>$1M</span><span>$1.5M</span><span>$2M</span><span>$2.5M</span><span>$3M</span>
-        </div>
-      </div>
-
-      <!-- Scenario pills -->
-      <div class="flex gap-3 flex-wrap mb-6">
-        <div class="sc-pill" onclick="setInvest(250000)"><strong id="pill-250k">—</strong>$250K</div>
-        <div class="sc-pill" onclick="setInvest(500000)"><strong id="pill-500k">—</strong>$500K</div>
-        <div class="sc-pill" onclick="setInvest(1053841)"><strong id="pill-actual">—</strong>$1.05M <small style="color:var(--text-muted)">(Actual)</small></div>
-        <div class="sc-pill" onclick="setInvest(1500000)"><strong id="pill-1p5m">—</strong>$1.5M</div>
-        <div class="sc-pill" onclick="setInvest(2000000)"><strong id="pill-2m">—</strong>$2M</div>
-      </div>
-
-      <!-- Channel cards -->
-      <div class="channel-grid">
-        <div class="channel-card wmc">
-          <div class="ch-icon wmc"><i class="fas fa-store" style="color:#93bbff"></i></div>
-          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--text-muted)">Walmart Connect</div>
-          <div class="text-sm font-semibold mb-2">In-Store + Online (WMC iROAS)</div>
-          <div class="ch-return-lbl">Projected Incremental Returns</div>
-          <div class="ch-return" id="wmc-return">$463,691</div>
-          <div class="text-xs mt-2" style="color:var(--text-muted)">at $0.44 WMC iROAS</div>
-        </div>
-        <div class="channel-card rom">
-          <div class="ch-icon rom"><i class="fas fa-globe" style="color:var(--sn-amber)"></i></div>
-          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--text-muted)">Rest of Market</div>
-          <div class="text-sm font-semibold mb-2">Cross-Retailer (NCS iROAS)</div>
-          <div class="ch-return-lbl">Projected Incremental Returns</div>
-          <div class="ch-return" id="rom-return">$4,299,671</div>
-          <div class="text-xs mt-2" style="color:var(--text-muted)">at $4.08 ROM iROAS</div>
-        </div>
-      </div>
-
-      <!-- Total bar -->
-      <div class="total-bar">
-        <div class="total-row">
-          <span style="color:var(--text-muted)">WMC Incremental</span>
-          <span class="font-bold" style="color:#93bbff" id="tot-wmc">$463,691</span>
-        </div>
-        <div class="total-row">
-          <span style="color:var(--text-muted)">ROM Incremental</span>
-          <span class="font-bold" style="color:var(--sn-amber)" id="tot-rom">$4,299,671</span>
-        </div>
-        <div class="total-row" style="padding-top:12px">
-          <span class="text-base">🏆 Total Projected Incremental</span>
-          <span class="text-2xl" style="font-family:'Oswald',sans-serif" id="tot-combined">$4,763,362</span>
-        </div>
-      </div>
-
-      <div class="mt-6 insight-box">
-        <p class="text-sm"><strong style="color:var(--sn-amber)">💡 Power of the Full-Funnel:</strong> Awareness tactics (CTV, Audio, Podcasts) drive the ROM impact by building brand salience across the broader market — not just at Walmart. Pair them with lower-funnel Display + Native for maximum total-market ROI.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- ── FUTURE CONSIDERATIONS ── -->
   <section class="reveal pb-10">
     <div class="section-tag">🔮 Recommendations</div>
@@ -1022,28 +948,7 @@ new Chart(document.getElementById('spendChart'), {
   }
 });
 
-/* ── ROAS Comparison Bar ── */
-new Chart(document.getElementById('roasChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Display','Native','CTV','Podcasts','Retargeting','Music'],
-    datasets: [
-      { label:'Ad-Exposed ROAS', data:[5.04,4.14,0.88,0.84,0.75,0.64],
-        backgroundColor:'rgba(200,150,12,.7)', borderRadius:6 },
-      { label:'WMC iROAS', data:[0.44,0.44,0.44,0.44,0.44,0.44],
-        backgroundColor:'rgba(74,157,191,.5)', borderRadius:6, type:'line',
-        borderColor:'#4A9DBF', borderDash:[4,4], pointRadius:0, tension:0 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    scales: {
-      y: { grid: { color:'rgba(28,60,36,.4)' }, ticks: { callback: v => '$'+v } },
-      x: { grid: { display:false } }
-    },
-    plugins: { legend: { position:'top' } }
-  }
-});
+
 
 /* ── Buyer Donut ── */
 new Chart(document.getElementById('buyerDonut'), {
