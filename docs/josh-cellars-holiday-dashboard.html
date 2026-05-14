@@ -86,6 +86,33 @@ h1,h2,.serif { font-family:'Cormorant Garamond',serif; }
 .sticky-nav li a:hover,
 .sticky-nav li a.active { color:#C8A431; border-bottom-color:#C8A431; }
 
+/* ── Edit Mode ── */
+.edit-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(200,164,49,.15); border:1px solid rgba(200,164,49,.4);
+  color:#C8A431; padding:5px 14px; border-radius:99px;
+  font-size:.72rem; font-weight:700; cursor:pointer;
+  transition:all .15s; white-space:nowrap; flex-shrink:0;
+}
+.edit-btn:hover { background:rgba(200,164,49,.28); }
+.edit-btn.active { background:rgba(220,38,38,.15); border-color:rgba(220,38,38,.5); color:#fca5a5; }
+.save-btn {
+  display:none; align-items:center; gap:6px;
+  background:rgba(47,158,68,.15); border:1px solid rgba(47,158,68,.45);
+  color:#5FCC74; padding:5px 14px; border-radius:99px;
+  font-size:.72rem; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.edit-mode-active .save-btn { display:inline-flex; }
+.edit-mode-active [data-editable] {
+  outline:2px dashed rgba(200,164,49,.55); border-radius:4px;
+  cursor:text; min-width:16px; display:inline-block;
+  transition:outline .15s;
+}
+.edit-mode-active [data-editable]:focus {
+  outline:2px solid #C8A431; background:rgba(200,164,49,.08);
+  border-radius:4px;
+}
+
 /* ── Exec Ticker ── */
 .exec-ribbon {
   background:linear-gradient(90deg, #1B4073, #2B5A9E, #1B4073);
@@ -313,23 +340,23 @@ section { scroll-margin-top:52px; }
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
       <div class="kpi-card spotlight" style="background:rgba(255,255,255,.1);border-color:rgba(200,164,49,.6);">
         <div class="label" style="color:rgba(255,255,255,.6)">Impressions Delivered</div>
-        <div class="metric" style="color:#C8A431;font-size:2.4rem;" id="h-imp">58.1M</div>
-        <div class="sub" style="color:rgba(255,255,255,.55)">Rich Media Display</div>
+        <div class="metric" style="color:#C8A431;font-size:2.4rem;" id="h-imp" data-editable data-key="h_imp">58.1M</div>
+        <div class="sub" style="color:rgba(255,255,255,.55)" data-editable data-key="h_imp_sub">Rich Media Display</div>
       </div>
       <div class="kpi-card spotlight" style="background:rgba(255,255,255,.1);border-color:rgba(200,164,49,.6);">
         <div class="label" style="color:rgba(255,255,255,.6)">Overall Sales Lift</div>
-        <div class="metric" style="color:#7FE69A;font-size:2.4rem;">+17.05%</div>
-        <div class="sub" style="color:rgba(255,255,255,.55)">Statistically significant</div>
+        <div class="metric" style="color:#7FE69A;font-size:2.4rem;" data-editable data-key="h_lift">+17.05%</div>
+        <div class="sub" style="color:rgba(255,255,255,.55)" data-editable data-key="h_lift_sub">Statistically significant</div>
       </div>
       <div class="kpi-card spotlight" style="background:rgba(255,255,255,.1);border-color:rgba(200,164,49,.6);">
         <div class="label" style="color:rgba(255,255,255,.6)">Traceable ROAS</div>
-        <div class="metric" style="color:#C8A431;font-size:2.4rem;">$15.5</div>
-        <div class="sub" style="color:rgba(255,255,255,.55)">$2.3M traceable sales</div>
+        <div class="metric" style="color:#C8A431;font-size:2.4rem;" data-editable data-key="h_roas">$15.5</div>
+        <div class="sub" style="color:rgba(255,255,255,.55)" data-editable data-key="h_roas_sub">$2.3M traceable sales</div>
       </div>
       <div class="kpi-card spotlight" style="background:rgba(255,255,255,.1);border-color:rgba(200,164,49,.6);">
         <div class="label" style="color:rgba(255,255,255,.6)">New Buyer Rate</div>
-        <div class="metric" style="color:#93bbff;font-size:2.4rem;">55%</div>
-        <div class="sub" style="color:rgba(255,255,255,.55)">Customer acquisition win</div>
+        <div class="metric" style="color:#93bbff;font-size:2.4rem;" data-editable data-key="h_nbr">55%</div>
+        <div class="sub" style="color:rgba(255,255,255,.55)" data-editable data-key="h_nbr_sub">Customer acquisition win</div>
       </div>
     </div>
   </div>
@@ -337,14 +364,20 @@ section { scroll-margin-top:52px; }
 
 <!-- Sticky Nav -->
 <nav class="sticky-nav" aria-label="Dashboard sections">
-  <ul class="max-w-7xl mx-auto">
-    <li><a href="#spotlight">🍷 Campaign Spotlight</a></li>
-    <li><a href="#calculator">💡 Investment Calc</a></li>
-    <li><a href="#buyers">👥 Buyer Insights</a></li>
-    <li><a href="#category">🏆 Category Intel</a></li>
-    <li><a href="#ncv">📈 New Buyer Value</a></li>
-    <li><a href="#recs">🎯 Recommendations</a></li>
-  </ul>
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <ul style="display:flex;gap:2px;list-style:none;margin:0;padding:0;overflow-x:auto;">
+      <li><a href="#spotlight">🍷 Campaign Spotlight</a></li>
+      <li><a href="#calculator">💡 Investment Calc</a></li>
+      <li><a href="#buyers">👥 Buyer Insights</a></li>
+      <li><a href="#category">🏆 Category Intel</a></li>
+      <li><a href="#ncv">📈 New Buyer Value</a></li>
+      <li><a href="#recs">🎯 Recommendations</a></li>
+    </ul>
+    <div style="display:flex;gap:8px;padding:8px 0;margin-left:16px;">
+      <button class="edit-btn" id="editBtn" onclick="toggleEditMode()"><i class="fas fa-pencil"></i> Edit</button>
+      <button class="save-btn" id="saveBtn" onclick="saveToUrl()"><i class="fas fa-link"></i> Save URL</button>
+    </div>
+  </div>
 </nav>
 
 <!-- Executive Ticker -->
@@ -383,33 +416,59 @@ section { scroll-margin-top:52px; }
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
       <div class="kpi-card gold-card">
         <div class="label">Campaign Budget</div>
-        <div class="metric" style="font-size:1.6rem">$698,957</div>
-        <div class="sub">Rich Media Display · 7 Weeks</div>
+        <div class="metric" style="font-size:1.6rem" data-editable data-key="s_budget">$698,957</div>
+        <div class="sub" data-editable data-key="s_budget_sub">Rich Media Display · 7 Weeks</div>
       </div>
       <div class="kpi-card blue-card">
         <div class="label">Impressions Delivered</div>
-        <div class="metric">58.1M</div>
-        <div class="sub">Walmart 1PD Audience Targeting</div>
+        <div class="metric" data-editable data-key="s_imps">58.1M</div>
+        <div class="sub" data-editable data-key="s_imps_sub">Walmart 1PD Audience Targeting</div>
       </div>
       <div class="kpi-card green-card">
         <div class="label">Incremental Revenue</div>
-        <div class="metric">$719K</div>
-        <div class="sub">Beyond baseline demand</div>
+        <div class="metric" data-editable data-key="s_incr">$719K</div>
+        <div class="sub" data-editable data-key="s_incr_sub">Beyond baseline demand</div>
       </div>
       <div class="kpi-card spotlight">
         <div class="label">Overall Sales Lift</div>
-        <div class="metric" style="color:#2F9E44">+17.05%</div>
-        <div class="sub">In-store + Online combined</div>
+        <div class="metric" style="color:#2F9E44" data-editable data-key="s_lift">+17.05%</div>
+        <div class="sub" data-editable data-key="s_lift_sub">In-store + Online combined</div>
       </div>
       <div class="kpi-card blue-card">
         <div class="label">Traceable ROAS</div>
-        <div class="metric">$15.5</div>
-        <div class="sub">$2.3M total traceable sales</div>
+        <div class="metric" data-editable data-key="s_roas">$15.5</div>
+        <div class="sub" data-editable data-key="s_roas_sub">$2.3M total traceable sales</div>
       </div>
       <div class="kpi-card gold-card">
         <div class="label">New Buyer Rate</div>
-        <div class="metric">55%</div>
-        <div class="sub">Consistent across all geos</div>
+        <div class="metric" data-editable data-key="s_nbr">55%</div>
+        <div class="sub" data-editable data-key="s_nbr_sub">Consistent across all geos</div>
+      </div>
+    </div>
+
+    <!-- Incremental Units highlight -->
+    <div class="kpi-card mb-8" style="background:linear-gradient(135deg,#1B4073 0%,#2B5A9E 60%,#1E4D80 100%);border:2px solid var(--jc-gold);position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;opacity:.05;background:repeating-linear-gradient(-45deg,#C8A431 0,#C8A431 1px,transparent 0,transparent 30px);"></div>
+      <div class="flex flex-wrap items-center justify-between gap-6 relative z-10">
+        <div>
+          <div class="label" style="color:rgba(200,164,49,.8)">📦 Est. Incremental Units Sold</div>
+          <div style="font-size:3rem;font-weight:900;color:#C8A431;font-family:'Cormorant Garamond',serif;line-height:1;" data-editable data-key="incr_units">123,339</div>
+          <div style="color:rgba(255,255,255,.65);margin-top:6px;font-size:.78rem;" data-editable data-key="incr_units_sub">Units driven above baseline · NCS Sales Lift · Nov 11 – Dec 31, 2025</div>
+        </div>
+        <div class="flex gap-6">
+          <div class="text-center">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:4px;">Per $1K Invested</div>
+            <div style="font-size:1.5rem;font-weight:800;color:#fff;">~176 units</div>
+          </div>
+          <div class="text-center">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:4px;">Sales Lift</div>
+            <div style="font-size:1.5rem;font-weight:800;color:#5FCC74;">+17.05%</div>
+          </div>
+          <div class="text-center">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:4px;">Incr. Revenue</div>
+            <div style="font-size:1.5rem;font-weight:800;color:#93bbff;">$719K</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -478,6 +537,19 @@ section { scroll-margin-top:52px; }
         </div>
       </div>
 
+      <!-- Case volume card -->
+      <div style="background:rgba(200,164,49,.12);border:1px solid rgba(200,164,49,.35);border-radius:12px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:4px;">📦 Projected Incremental Case Volume</div>
+          <div style="font-size:2.2rem;font-weight:900;color:#C8A431;font-family:'Cormorant Garamond',serif;line-height:1;" id="caseVolume">10,278 cases</div>
+          <div style="font-size:.75rem;color:rgba(255,255,255,.45);margin-top:4px;">Scaled from $698,957 actual → 10,278 cases sold through</div>
+        </div>
+        <div class="text-right">
+          <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:4px;">Cases per $1K</div>
+          <div style="font-size:1.4rem;font-weight:800;color:rgba(255,255,255,.85);">~14.7</div>
+        </div>
+      </div>
+
       <div class="total-bar">
         <div class="total-row">
           <span>Walmart Connect Incremental Return</span>
@@ -486,6 +558,10 @@ section { scroll-margin-top:52px; }
         <div class="total-row">
           <span>Rest-of-Market Incremental Return</span>
           <span style="color:#C8A431;font-weight:700;" id="totalRom">$2,565,173</span>
+        </div>
+        <div class="total-row">
+          <span>Incremental Cases Sold Through</span>
+          <span style="color:#C8A431;font-weight:700;" id="totalCases">10,278 cases</span>
         </div>
         <div class="total-row">
           <span>Combined Projected Return</span>
@@ -778,16 +854,21 @@ window.addEventListener('scroll', () => {
 /* ── Investment Calculator ── */
 const WMC_IROAS = 2.37, ROM_IROAS = 3.67;
 const CALC_MIN = 250000, CALC_MAX = 3000000;
+const BASE_INVEST = 698957, BASE_CASES = 10278;
 function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+function fmtCases(n) { return Math.round(n).toLocaleString() + ' cases'; }
 function updateCalc(val) {
   const v = Number(val);
   const wmc = v * WMC_IROAS, rom = v * ROM_IROAS, combo = wmc + rom;
+  const cases = BASE_CASES * (v / BASE_INVEST);
   document.getElementById('calcDisplay').textContent = fmt(v);
   document.getElementById('wmcReturn').textContent = fmt(wmc);
   document.getElementById('romReturn').textContent = fmt(rom);
   document.getElementById('totalWmc').textContent = fmt(wmc);
   document.getElementById('totalRom').textContent = fmt(rom);
   document.getElementById('totalCombined').textContent = fmt(combo);
+  document.getElementById('caseVolume').textContent = fmtCases(cases);
+  document.getElementById('totalCases').textContent = fmtCases(cases);
   // Drive the fill bar directly on the element — no CSS custom property needed
   const pct = ((v - CALC_MIN) / (CALC_MAX - CALC_MIN) * 100).toFixed(2);
   const slider = document.getElementById('calcSlider');
@@ -799,7 +880,40 @@ function setScenario(val) {
   updateCalc(val);
 }
 // Init on load
-document.addEventListener('DOMContentLoaded', () => updateCalc(698957));
+document.addEventListener('DOMContentLoaded', () => { updateCalc(698957); loadFromUrl(); });
+
+/* ── Edit Mode ── */
+let editMode = false;
+function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode-active', editMode);
+  const btn = document.getElementById('editBtn');
+  if (editMode) {
+    btn.innerHTML = '<i class="fas fa-times"></i> Done';
+    btn.classList.add('active');
+    document.querySelectorAll('[data-editable]').forEach(el => { el.contentEditable = 'true'; });
+  } else {
+    btn.innerHTML = '<i class="fas fa-pencil"></i> Edit';
+    btn.classList.remove('active');
+    document.querySelectorAll('[data-editable]').forEach(el => { el.contentEditable = 'false'; });
+    saveToUrl();
+  }
+}
+function saveToUrl() {
+  const data = {};
+  document.querySelectorAll('[data-key]').forEach(el => { data[el.dataset.key] = el.textContent.trim(); });
+  window.location.hash = btoa(encodeURIComponent(JSON.stringify(data)));
+}
+function loadFromUrl() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(atob(hash)));
+    Object.entries(data).forEach(([key, val]) => {
+      document.querySelectorAll('[data-key="' + key + '"]').forEach(el => { el.textContent = val; });
+    });
+  } catch(e) { /* bad hash, ignore */ }
+}
 
 /* ── Chart: Sales Lift Breakdown ── */
 new Chart(document.getElementById('liftChart'), {
