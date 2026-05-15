@@ -7,7 +7,10 @@ const WMT = {
   q3: { invest:554700,  iroas:3.74,  inc:2080000, label:'Q3 · Oct–Dec 2025', color:'#e83d6a', dot:'#e83d6a',
         impr:'250M', roas:'$32.09', lift:'8.7%',  newBuyers:'N/A' },
 };
-const ROM_IROAS = 80.49;
+const ROM = {
+  q3: { iroas: 10.89, label: 'Q3 · Oct–Dec 2025', lift: '1.56%', color: '#26c6da' },
+  q4: { iroas: 10.60, label: 'Q4 · Jan–Mar 2026', lift: '0.65%', color: '#00b0a0' },
+};
 const WMT_TOTAL_INVEST = WMT.q1.invest + WMT.q2.invest + WMT.q3.invest;
 const Q_WEIGHTS = {
   q1: WMT.q1.invest / WMT_TOTAL_INVEST,
@@ -34,35 +37,58 @@ function updateSliderTrack(el) {
   el.style.setProperty('--pct', p);
 }
 
-// ── QUARTER SELECTION ────────────────────────────────────────────────────────
+// ── QUARTER SELECTION: WALMART ───────────────────────────────────────────────
 let selectedQ = 'q3';  // default: most recent quarter
 
 function selectQuarter(q) {
   selectedQ = q;
   const section = document.querySelector('.acc-section');
-  // Update all items: remove selected+open, then set on chosen
-  section.querySelectorAll('.acc-item').forEach(item => {
-    item.classList.remove('selected', 'open');
-  });
+  section.querySelectorAll('.acc-item').forEach(item => item.classList.remove('selected', 'open'));
   const chosen = $('acc-' + q);
   if (chosen) chosen.classList.add('selected', 'open');
-  // Sync aria-expanded
-  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded','false'));
+  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded', 'false'));
   const chosenHeader = chosen && chosen.querySelector('.acc-header');
-  if (chosenHeader) chosenHeader.setAttribute('aria-expanded','true');
+  if (chosenHeader) chosenHeader.setAttribute('aria-expanded', 'true');
   updateAll();
 }
 
 function initAccordions() {
-  document.querySelectorAll('.acc-header').forEach(header => {
-    const item   = header.closest('.acc-item');
-    const q      = item.id.replace('acc-','');  // 'q1' | 'q2' | 'q3'
+  document.querySelectorAll('.acc-section:not(.rom-acc-section) .acc-header').forEach(header => {
+    const item = header.closest('.acc-item');
+    const q    = item.id.replace('acc-', '');
     header.addEventListener('click', () => selectQuarter(q));
     header.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectQuarter(q); }
     });
   });
-  selectQuarter('q3');  // open + select Q3 on load
+  selectQuarter('q3');
+}
+
+// ── QUARTER SELECTION: REST OF MARKET ─────────────────────────────────────────
+let selectedRomQ = 'q3';  // default: most recent ROM quarter
+
+function selectRomQuarter(q) {
+  selectedRomQ = q;
+  const section = document.querySelector('.rom-acc-section');
+  section.querySelectorAll('.acc-item').forEach(item => item.classList.remove('selected', 'open'));
+  const chosen = $('rom-acc-' + q);
+  if (chosen) chosen.classList.add('selected', 'open');
+  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded', 'false'));
+  const chosenHeader = chosen && chosen.querySelector('.acc-header');
+  if (chosenHeader) chosenHeader.setAttribute('aria-expanded', 'true');
+  updateAll();
+}
+
+function initRomAccordions() {
+  document.querySelectorAll('.rom-acc-section .acc-header').forEach(header => {
+    const item = header.closest('.acc-item');
+    const q    = item.id.replace('rom-acc-', '');
+    header.addEventListener('click', () => selectRomQuarter(q));
+    header.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectRomQuarter(q); }
+    });
+  });
+  selectRomQuarter('q3');
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────────────
@@ -98,17 +124,21 @@ function updateAll() {
   set('invest-label', fmtM(invest));
 
   // SAME $invest goes to BOTH channels simultaneously.
-  // Walmart uses the SELECTED quarter's exact iROAS (not a blend).
-  const activeQ     = WMT[selectedQ];
-  const wmtReturn   = invest * activeQ.iroas;
-  const romReturn   = invest * ROM_IROAS;
-  const totalReturn = wmtReturn + romReturn;
+  const activeQ      = WMT[selectedQ];
+  const activeRomQ   = ROM[selectedRomQ];
+  const wmtReturn    = invest * activeQ.iroas;
+  const romReturn    = invest * activeRomQ.iroas;
+  const totalReturn  = wmtReturn + romReturn;
   const blendedIROAS = totalReturn / invest;
 
-  // Show projected return for every quarter in each accordion row
+  // Per-quarter projected returns for WMT accordion rows
   const q1Proj = invest * WMT.q1.iroas;
   const q2Proj = invest * WMT.q2.iroas;
   const q3Proj = invest * WMT.q3.iroas;
+
+  // Per-quarter projected returns for ROM accordion rows
+  const romQ3Proj = invest * ROM.q3.iroas;
+  const romQ4Proj = invest * ROM.q4.iroas;
 
   // ── Summary row ──
   set('invest-display', fmtM(invest));
@@ -138,6 +168,15 @@ function updateAll() {
 
   // ── ROM card ──
   set('rom-return', fmt(romReturn));
+  set('rom-iroas-badge', activeRomQ.label.split(' · ')[0] + ' iROAS: $' + activeRomQ.iroas.toFixed(2));
+  set('rom-q3-proj', fmt(romQ3Proj));  set('rom-q3-proj-body', fmt(romQ3Proj));
+  set('rom-q4-proj', fmt(romQ4Proj));  set('rom-q4-proj-body', fmt(romQ4Proj));
+  // ROM accordion bars: scale to Q3 being 100% (higher iROAS)
+  const maxRomIROAS = ROM.q3.iroas;
+  ['q3','q4'].forEach(q => {
+    const bar = $(`rom-acc-bar-${q}`);
+    if (bar) bar.style.width = (ROM[q].iroas / maxRomIROAS * 100) + '%';
+  });
 
   // ── Total card ──
   set('total-return-big',  fmt(totalReturn));
@@ -153,6 +192,7 @@ function updateAll() {
 document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   initAccordions();
+  initRomAccordions();
   updateAll();
 });
 
