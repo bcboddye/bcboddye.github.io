@@ -106,11 +106,15 @@ input[type=range]::-webkit-slider-thumb{appearance:none;width:26px;height:26px;b
 .acc-item.selected.q1-sel{border-color:#f59e0b;box-shadow:0 0 12px rgba(245,158,11,.25)}
 .acc-item.selected.q2-sel{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.3)}
 .acc-item.selected.q3-sel{border-color:#e83d6a;box-shadow:0 0 12px rgba(232,61,106,.25)}
+.acc-item.selected.rom-q3-sel{border-color:#26c6da;box-shadow:0 0 12px rgba(38,198,218,.3)}
+.acc-item.selected.rom-q4-sel{border-color:#00b0a0;box-shadow:0 0 12px rgba(0,176,160,.3)}
 .acc-active-tag{display:none;font-size:.62rem;font-weight:800;letter-spacing:.6px;padding:2px 7px;border-radius:10px;text-transform:uppercase}
 .acc-item.selected .acc-active-tag{display:inline-block}
 .acc-item.q1-sel .acc-active-tag{background:rgba(245,158,11,.25);color:#fbbf24}
 .acc-item.q2-sel .acc-active-tag{background:rgba(59,130,246,.25);color:#93c5fd}
 .acc-item.q3-sel .acc-active-tag{background:rgba(232,61,106,.25);color:#fda4af}
+.acc-item.rom-q3-sel .acc-active-tag{background:rgba(38,198,218,.25);color:#67e8f9}
+.acc-item.rom-q4-sel .acc-active-tag{background:rgba(0,176,160,.25);color:#5eead4}
 .acc-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;user-select:none;transition:background .2s}
 .acc-header:hover{background:rgba(255,255,255,.06)}
 .acc-header:focus-visible{outline:2px solid var(--wm-spark);outline-offset:-2px}
@@ -385,28 +389,70 @@ input.cj-range::-webkit-slider-thumb{border-color:#22d3ee;box-shadow:0 2px 10px 
           <div class="hl-main">
             <small>Projected Incremental Return @ Investment</small>
             <strong id="rom-return">—</strong>
-            <div class="hl-sub">NCS-verified iROAS × same investment amount</div>
+            <div class="hl-sub">NCS-verified iROAS × same investment — click a quarter below to switch</div>
           </div>
-          <div class="hl-badge rom-badge">iROAS: $80.49</div>
+          <div class="hl-badge rom-badge" id="rom-iroas-badge">iROAS: —</div>
         </div>
 
-        <div class="stat-grid">
-          <div class="stat-box stat-full">
-            <div class="label">NCS Verified iROAS — Rest of Market</div>
-            <div class="value" style="color:#5eead4;font-size:1.9rem">$80.49</div>
-            <div class="sub">Highest verified rate in portfolio</div>
-          </div>
-          <div class="stat-box stat-full">
-            <div class="label">Key Scenario Returns</div>
-            <div class="scenario-pills">
-              <span class="pill">$500K → $40.2M</span>
-              <span class="pill">$1M → $80.5M</span>
-              <span class="pill">$2M → $160.1M</span>
-              <span class="pill">$4M → $321.0M</span>
+        <!-- ROM QUARTER ACCORDIONS -->
+        <div class="acc-section rom-acc-section">
+          <h4>▾ Select a Quarter — drives ROM projection above</h4>
+
+          <!-- ROM Q3: Oct–Dec -->
+          <div class="acc-item rom-q3-sel" id="rom-acc-q3">
+            <div class="acc-header" role="button" tabindex="0" aria-expanded="false" aria-controls="rom-acc-q3-body">
+              <div class="acc-left">
+                <div class="acc-dot" style="background:#26c6da"></div>
+                <div>
+                  <div class="acc-title">Q3 · Oct–Dec 2025 🔴 Most Recent</div>
+                  <div class="acc-subtitle">iROAS $10.89 · Sales Lift 1.56%</div>
+                </div>
+              </div>
+              <div class="acc-right">
+                <span class="acc-active-tag">◉ Active</span>
+                <span class="acc-proj" id="rom-q3-proj" style="color:#26c6da">—</span>
+                <span class="acc-chevron">▼</span>
+              </div>
+            </div>
+            <div class="acc-body" id="rom-acc-q3-body">
+              <div class="acc-bar-wrap"><div class="acc-bar" id="rom-acc-bar-q3" style="width:100%;background:linear-gradient(90deg,#00897b,#26c6da)"></div></div>
+              <div class="acc-row"><span>iROAS (Q3)</span><strong style="color:#26c6da">$10.89</strong></div>
+              <div class="acc-row"><span>Sales Lift</span><strong style="color:#26c6da">1.56%</strong></div>
+              <div class="acc-row" style="background:rgba(38,198,218,.1);border-radius:6px;padding:6px 4px;margin-top:6px">
+                <span style="color:#99f6e4;font-weight:700">→ Projected at slider $</span>
+                <strong id="rom-q3-proj-body" style="color:#99f6e4">—</strong>
+              </div>
             </div>
           </div>
-        </div>
 
+          <!-- ROM Q4: Jan–Mar -->
+          <div class="acc-item rom-q4-sel" id="rom-acc-q4">
+            <div class="acc-header" role="button" tabindex="0" aria-expanded="false" aria-controls="rom-acc-q4-body">
+              <div class="acc-left">
+                <div class="acc-dot" style="background:#00b0a0"></div>
+                <div>
+                  <div class="acc-title">Q4 · Jan–Mar 2026</div>
+                  <div class="acc-subtitle">iROAS $10.60 · Sales Lift 0.65%</div>
+                </div>
+              </div>
+              <div class="acc-right">
+                <span class="acc-active-tag">◉ Active</span>
+                <span class="acc-proj" id="rom-q4-proj" style="color:#00b0a0">—</span>
+                <span class="acc-chevron">▼</span>
+              </div>
+            </div>
+            <div class="acc-body" id="rom-acc-q4-body">
+              <div class="acc-bar-wrap"><div class="acc-bar" id="rom-acc-bar-q4" style="width:97%;background:linear-gradient(90deg,#00897b,#00b0a0)"></div></div>
+              <div class="acc-row"><span>iROAS (Q4)</span><strong style="color:#00b0a0">$10.60</strong></div>
+              <div class="acc-row"><span>Sales Lift</span><strong style="color:#00b0a0">0.65%</strong></div>
+              <div class="acc-row" style="background:rgba(0,176,160,.1);border-radius:6px;padding:6px 4px;margin-top:6px">
+                <span style="color:#99f6e4;font-weight:700">→ Projected at slider $</span>
+                <strong id="rom-q4-proj-body" style="color:#99f6e4">—</strong>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /rom-acc-section -->
 
       </div>
     </article>
@@ -601,7 +647,7 @@ input.cj-range::-webkit-slider-thumb{border-color:#22d3ee;box-shadow:0 2px 10px 
 
   <footer>
     <p>FY26 White Claw × Walmart Connect · Mark Anthony Brands Inc. · Q1 Apr–Jun | Q2 Jul–Sep | Q3 Oct–Dec 2025</p>
-    <p style="margin-top:4px">iROAS: WMT Q1 $1.70 · Q2 $16.75 · Q3 $3.74 · ROM $80.49 · Sources: WMC SLR Oct 2025 · Display EOC Reports (FY26)</p>
+    <p style="margin-top:4px">iROAS: WMT Q1 $1.70 · Q2 $16.75 · Q3 $3.74 · ROM Q3 $10.89 · ROM Q4 $10.60 · Sources: WMC SLR Oct 2025 · NCS · Display EOC Reports (FY26)</p>
     <p style="margin-top:12px;font-size:.72rem;color:#6b7280">More Dashboards &mdash;
       <a href="makers-mark-dashboard.html" style="color:#ffc220;text-decoration:none;">Maker's Mark Q4 2025</a> &middot;
       <a href="josh-cellars-holiday-dashboard.html" style="color:#ffc220;text-decoration:none;">Josh Cellars Holiday 2025</a> &middot;
@@ -620,7 +666,10 @@ const WMT = {
   q3: { invest:554700,  iroas:3.74,  inc:2080000, label:'Q3 · Oct–Dec 2025', color:'#e83d6a', dot:'#e83d6a',
         impr:'250M', roas:'$32.09', lift:'8.7%',  newBuyers:'N/A' },
 };
-const ROM_IROAS = 80.49;
+const ROM = {
+  q3: { iroas: 10.89, label: 'Q3 · Oct–Dec 2025', lift: '1.56%', color: '#26c6da' },
+  q4: { iroas: 10.60, label: 'Q4 · Jan–Mar 2026', lift: '0.65%', color: '#00b0a0' },
+};
 const WMT_TOTAL_INVEST = WMT.q1.invest + WMT.q2.invest + WMT.q3.invest;
 const Q_WEIGHTS = {
   q1: WMT.q1.invest / WMT_TOTAL_INVEST,
@@ -647,35 +696,58 @@ function updateSliderTrack(el) {
   el.style.setProperty('--pct', p);
 }
 
-// ── QUARTER SELECTION ────────────────────────────────────────────────────────
+// ── QUARTER SELECTION: WALMART ───────────────────────────────────────────────
 let selectedQ = 'q3';  // default: most recent quarter
 
 function selectQuarter(q) {
   selectedQ = q;
   const section = document.querySelector('.acc-section');
-  // Update all items: remove selected+open, then set on chosen
-  section.querySelectorAll('.acc-item').forEach(item => {
-    item.classList.remove('selected', 'open');
-  });
+  section.querySelectorAll('.acc-item').forEach(item => item.classList.remove('selected', 'open'));
   const chosen = $('acc-' + q);
   if (chosen) chosen.classList.add('selected', 'open');
-  // Sync aria-expanded
-  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded','false'));
+  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded', 'false'));
   const chosenHeader = chosen && chosen.querySelector('.acc-header');
-  if (chosenHeader) chosenHeader.setAttribute('aria-expanded','true');
+  if (chosenHeader) chosenHeader.setAttribute('aria-expanded', 'true');
   updateAll();
 }
 
 function initAccordions() {
-  document.querySelectorAll('.acc-header').forEach(header => {
-    const item   = header.closest('.acc-item');
-    const q      = item.id.replace('acc-','');  // 'q1' | 'q2' | 'q3'
+  document.querySelectorAll('.acc-section:not(.rom-acc-section) .acc-header').forEach(header => {
+    const item = header.closest('.acc-item');
+    const q    = item.id.replace('acc-', '');
     header.addEventListener('click', () => selectQuarter(q));
     header.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectQuarter(q); }
     });
   });
-  selectQuarter('q3');  // open + select Q3 on load
+  selectQuarter('q3');
+}
+
+// ── QUARTER SELECTION: REST OF MARKET ────────────────────────────────────────
+let selectedRomQ = 'q3';  // default: most recent ROM quarter
+
+function selectRomQuarter(q) {
+  selectedRomQ = q;
+  const section = document.querySelector('.rom-acc-section');
+  section.querySelectorAll('.acc-item').forEach(item => item.classList.remove('selected', 'open'));
+  const chosen = $('rom-acc-' + q);
+  if (chosen) chosen.classList.add('selected', 'open');
+  section.querySelectorAll('.acc-header').forEach(h => h.setAttribute('aria-expanded', 'false'));
+  const chosenHeader = chosen && chosen.querySelector('.acc-header');
+  if (chosenHeader) chosenHeader.setAttribute('aria-expanded', 'true');
+  updateAll();
+}
+
+function initRomAccordions() {
+  document.querySelectorAll('.rom-acc-section .acc-header').forEach(header => {
+    const item = header.closest('.acc-item');
+    const q    = item.id.replace('rom-acc-', '');
+    header.addEventListener('click', () => selectRomQuarter(q));
+    header.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectRomQuarter(q); }
+    });
+  });
+  selectRomQuarter('q3');
 }
 
 // ── CHARTS ────────────────────────────────────────────────────────────────────
@@ -711,17 +783,21 @@ function updateAll() {
   set('invest-label', fmtM(invest));
 
   // SAME $invest goes to BOTH channels simultaneously.
-  // Walmart uses the SELECTED quarter's exact iROAS (not a blend).
-  const activeQ     = WMT[selectedQ];
-  const wmtReturn   = invest * activeQ.iroas;
-  const romReturn   = invest * ROM_IROAS;
-  const totalReturn = wmtReturn + romReturn;
+  const activeQ      = WMT[selectedQ];
+  const activeRomQ   = ROM[selectedRomQ];
+  const wmtReturn    = invest * activeQ.iroas;
+  const romReturn    = invest * activeRomQ.iroas;
+  const totalReturn  = wmtReturn + romReturn;
   const blendedIROAS = totalReturn / invest;
 
-  // Show projected return for every quarter in each accordion row
+  // Per-quarter projected returns for WMT accordion rows
   const q1Proj = invest * WMT.q1.iroas;
   const q2Proj = invest * WMT.q2.iroas;
   const q3Proj = invest * WMT.q3.iroas;
+
+  // Per-quarter projected returns for ROM accordion rows
+  const romQ3Proj = invest * ROM.q3.iroas;
+  const romQ4Proj = invest * ROM.q4.iroas;
 
   // ── Summary row ──
   set('invest-display', fmtM(invest));
@@ -751,6 +827,14 @@ function updateAll() {
 
   // ── ROM card ──
   set('rom-return', fmt(romReturn));
+  set('rom-iroas-badge', activeRomQ.label.split(' · ')[0] + ' iROAS: $' + activeRomQ.iroas.toFixed(2));
+  set('rom-q3-proj', fmt(romQ3Proj));  set('rom-q3-proj-body', fmt(romQ3Proj));
+  set('rom-q4-proj', fmt(romQ4Proj));  set('rom-q4-proj-body', fmt(romQ4Proj));
+  const maxRomIROAS = ROM.q3.iroas;
+  ['q3','q4'].forEach(q => {
+    const bar = $(`rom-acc-bar-${q}`);
+    if (bar) bar.style.width = (ROM[q].iroas / maxRomIROAS * 100) + '%';
+  });
 
   // ── Total card ──
   set('total-return-big',  fmt(totalReturn));
@@ -766,6 +850,7 @@ function updateAll() {
 document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   initAccordions();
+  initRomAccordions();
   updateAll();
 });
 
