@@ -317,7 +317,7 @@ input[type=range]::-webkit-slider-thumb {
     </div>
 
     <!-- Hero KPIs -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
       <div class="kpi-card hero-card spotlight">
         <div class="label">Total Investment</div>
         <div class="metric" data-editable data-key="hero_invest">$1.05M</div>
@@ -347,6 +347,11 @@ input[type=range]::-webkit-slider-thumb {
         <div class="label">Incremental Sales</div>
         <div class="metric" style="color:#6ee09a" data-editable data-key="hero_incr">$459K</div>
         <div class="sub">WMC Sales Lift</div>
+      </div>
+      <div class="kpi-card green-spot">
+        <div class="label">Incremental Units</div>
+        <div class="metric" style="color:#6ee09a" data-editable data-key="hero_incr_units">21,013</div>
+        <div class="sub">Units driven by spend</div>
       </div>
     </div>
   </div>
@@ -652,6 +657,10 @@ input[type=range]::-webkit-slider-thumb {
         <div class="total-row">
           <span style="color:var(--text-muted)">ROM Incremental</span>
           <span class="font-bold" style="color:var(--sn-amber)" id="tot-rom">$4,299,671</span>
+        </div>
+        <div class="total-row">
+          <span style="color:var(--text-muted)">📦 Incremental Units Sold</span>
+          <span class="font-bold" style="color:#6ee09a" id="tot-incr-units">21,013</span>
         </div>
         <div class="total-row" style="padding-top:12px">
           <span class="text-base">🏆 Total Projected Incremental</span>
@@ -992,6 +1001,8 @@ new Chart(document.getElementById('categoryChart'), {
 /* ── Investment Calculator ── */
 const WMC_IROAS = 0.44;
 const ROM_IROAS = 4.08;
+// Incremental units rate: 21,013 units measured at $1,053,841 investment
+const INCR_UNITS_RATE = 21013 / 1053841;
 
 function updateCalc() {
   const val = +document.getElementById('invest-slider').value;
@@ -999,15 +1010,17 @@ function updateCalc() {
   document.getElementById('invest-slider').style.setProperty('--pct', pct + '%');
   document.getElementById('invest-display').textContent = fmt(val);
 
-  const wmcRet  = val * WMC_IROAS;
-  const romRet  = val * ROM_IROAS;
-  const total   = wmcRet + romRet;
+  const wmcRet    = val * WMC_IROAS;
+  const romRet    = val * ROM_IROAS;
+  const total     = wmcRet + romRet;
+  const incrUnits = Math.round(val * INCR_UNITS_RATE);
 
-  document.getElementById('wmc-return').textContent  = fmt(wmcRet);
-  document.getElementById('rom-return').textContent  = fmt(romRet);
-  document.getElementById('tot-wmc').textContent     = fmt(wmcRet);
-  document.getElementById('tot-rom').textContent     = fmt(romRet);
-  document.getElementById('tot-combined').textContent= fmt(total);
+  document.getElementById('wmc-return').textContent    = fmt(wmcRet);
+  document.getElementById('rom-return').textContent    = fmt(romRet);
+  document.getElementById('tot-wmc').textContent       = fmt(wmcRet);
+  document.getElementById('tot-rom').textContent       = fmt(romRet);
+  document.getElementById('tot-combined').textContent  = fmt(total);
+  document.getElementById('tot-incr-units').textContent = incrUnits.toLocaleString();
 
   // Update pills
   [250000,500000,1053841,1500000,2000000].forEach((v,i) => {
